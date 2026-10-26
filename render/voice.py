@@ -2,7 +2,7 @@
 
 Xác thực: Network secret của môi trường Claude cho host api.vbee.vn gắn sẵn 2 header
 Authorization: Bearer <token> và App-Id: <app id>. Chạy ở nơi khác thì đặt VBEE_TOKEN và VBEE_APP_ID.
-Giọng: --voice hoặc biến môi trường VBEE_VOICE (mặc định SG - Tường Vy nếu không đặt).
+Giọng: --voice hoặc biến môi trường VBEE_VOICE (mặc định giọng clone Nguyễn Hoài Anh).
 
 Ví dụ:
   python3 render/voice.py examples/bangtin-mau.json --dry-run          # chỉ in lời đọc
@@ -24,7 +24,7 @@ import requests
 
 API = "https://api.vbee.vn/v1/tts"
 VOICES_API = "https://vbee.vn/api/public/v1/voices"
-DEFAULT_VOICE = "hn_female_ngochuyen_full_48k-fhg"
+DEFAULT_VOICE = "s_cantho_male_nguyenhoaianhdemo_zero_shot_story_vc"  # giọng clone Nguyễn Hoài Anh
 DEFAULT_SPEED = "1.0"
 MAX_CHARS = 300
 ROOT = Path(__file__).resolve().parent.parent
