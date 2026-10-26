@@ -1,7 +1,7 @@
 """Tạo giọng đọc cho video bảng tin bằng Vbee (mỗi cảnh một câu, khớp với cảnh trong video).
 
-Xác thực: Network secret của môi trường Claude cho host api.vbee.vn (header Authorization: Bearer <token>)
-và biến môi trường VBEE_APP_ID. Chạy ở nơi khác thì đặt thêm VBEE_TOKEN.
+Xác thực: Network secret của môi trường Claude cho host api.vbee.vn gắn sẵn 2 header
+Authorization: Bearer <token> và App-Id: <app id>. Chạy ở nơi khác thì đặt VBEE_TOKEN và VBEE_APP_ID.
 Giọng: --voice hoặc biến môi trường VBEE_VOICE (mặc định SG - Tường Vy nếu không đặt).
 
 Ví dụ:
@@ -120,10 +120,9 @@ def script(d):
 
 
 def _headers():
-    app = os.environ.get("VBEE_APP_ID")
-    if not app:
-        raise SystemExit("Thiếu biến môi trường VBEE_APP_ID")
-    h = {"Content-Type": "application/json", "App-Id": app}
+    h = {"Content-Type": "application/json"}
+    if os.environ.get("VBEE_APP_ID"):
+        h["App-Id"] = os.environ["VBEE_APP_ID"]
     if os.environ.get("VBEE_TOKEN"):
         h["Authorization"] = f"Bearer {os.environ['VBEE_TOKEN']}"
     return h

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Dựng video động thương hiệu D24 (Remotion) từ JSON bảng tin, có nhạc nền, chuẩn âm lượng -14 LUFS.
 # Cách dùng: render/video.sh examples/bangtin-mau.json out/video.mp4 [--voice]
-#   --voice: thêm giọng đọc Vbee (cần VBEE_APP_ID và khóa Vbee trong môi trường, xem render/voice.py)
+#   --voice: thêm giọng đọc Vbee (cần khóa Vbee trong môi trường, xem render/voice.py)
 set -euo pipefail
 json="$(realpath "$1")"; out="$(realpath -m "$2")"; voice="${3:-}"
 root="$(cd "$(dirname "$0")/.." && pwd)"
