@@ -1,0 +1,39 @@
+{
+  "_ghi_chu": "Cách đọc cho giọng Vbee. 'doc': thay chữ bằng cách đọc tiếng Việt. 'dich': tên vị trí tiếng Anh dịch sang tiếng Việt. Thêm từ mới khi nghe thấy đọc sai.",
+  "doc": {
+    "Design24": "Đì sai hai bốn",
+    "Design 24": "Đì sai hai bốn",
+    "D24": "Đê hai bốn",
+    "Zalo": "Da lô",
+    "Fanpage": "phan pết",
+    "Inbox": "nhắn tin",
+    "link": "đường dẫn",
+    "website": "oép sai",
+    "timviecso.vn": "tìm việc số chấm vê en",
+    "design24.vn": "đì sai hai bốn chấm vê en",
+    "online": "on lai",
+    "HCM": "Hồ Chí Minh",
+    "TP.HCM": "Thành phố Hồ Chí Minh",
+    "Shorts": "sọt"
+  },
+  "dich": {
+    "Quality Manager": "Quản lý chất lượng",
+    "Sales & Commercial Manager": "Quản lý kinh doanh",
+    "Sales Manager": "Quản lý kinh doanh",
+    "Senior Sale": "Nhân viên kinh doanh cấp cao",
+    "Sales": "Kinh doanh",
+    "Merchandiser": "Nhân viên phát triển sản phẩm",
+    "Chief Accountant": "Kế toán trưởng",
+    "Driver": "Tài xế",
+    "Customer Service Officer": "Nhân viên dịch vụ khách hàng",
+    "Pick & Pack": "đóng gói",
+    "R&D": "nghiên cứu phát triển",
+    "QS MEP": "dự toán cơ điện",
+    "QS": "dự toán",
+    "MEP": "cơ điện",
+    "HVAC": "điều hòa thông gió",
+    "BIM": "mô hình thông tin công trình",
+    "IT": "công nghệ thông tin",
+    "Marketing": "ma két tinh"
+  }
+}
