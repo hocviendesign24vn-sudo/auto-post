@@ -1,0 +1,41 @@
+{
+  "date": "26/10/2026",
+  "regionsLine": ["Cần Thơ", "Đồng bằng sông Cửu Long", "TP. Hồ Chí Minh"],
+  "stats": [
+    {"icon": "briefcase", "value": "18", "label": "vị trí\ntuyển dụng"},
+    {"icon": "pin", "value": "6", "label": "khu vực\ncó việc"},
+    {"icon": "calendar", "value": "30/11", "label": "hạn nộp\nmuộn nhất"}
+  ],
+  "lists": [
+    {"name": "TP. HỒ CHÍ MINH", "sub": "Lương tốt, nhận hồ sơ ngay", "theme": "orange", "jobs": [
+      {"pos": "Kế toán trưởng (tiếng Nhật)", "co": "STEC Global Việt Nam", "sal": "24–36 triệu", "dl": "24/11"},
+      {"pos": "NV kế toán tổng hợp", "co": "Bao bì thông minh intBOX", "sal": "25–30 triệu", "dl": "24/11"},
+      {"pos": "Giám sát SX mộc và sofa", "co": "XD và Đầu tư Galaxy", "sal": "15–30 triệu", "dl": "24/11"},
+      {"pos": "CV kế toán tổng hợp", "co": "Dịch vụ BĐS Đất Xanh", "sal": "16–19 triệu", "dl": "24/11"},
+      {"pos": "NV bảo trì điện lạnh", "co": "Sen Vàng Việt Nam", "sal": "12–14 triệu", "dl": "24/11"},
+      {"pos": "Lái xe văn phòng", "co": "ZOTT Việt Nam", "sal": "Đến 10 triệu", "dl": "24/11"}
+    ]},
+    {"name": "CẦN THƠ", "sub": "Việc làm đang nhận hồ sơ", "theme": "blue", "jobs": [
+      {"pos": "Chỉ huy trưởng công trình", "co": "XD Hoàng Liên Sơn", "sal": "25–35 triệu", "dl": "13/11"},
+      {"pos": "Quality Manager", "co": "Vườn Trái Cửu Long", "sal": "25–30 triệu", "dl": "14/11"},
+      {"pos": "Tổ trưởng đúc thép", "co": "Thép Tây Đô", "sal": "25–30 triệu", "dl": "20/11"},
+      {"pos": "Sales & Commercial Manager", "co": "Lạc's Beauty Center", "sal": "17–30 triệu", "dl": "20/11"},
+      {"pos": "Quản lý thi công", "co": "Xhome Cần Thơ", "sal": "15–18 triệu", "dl": "30/11"},
+      {"pos": "NV kinh doanh thiết bị y tế", "co": "TM-DV Hoàng Thuộc", "sal": "10–12 triệu", "dl": "15/11"}
+    ]}
+  ],
+  "grid": {"name": "ĐỒNG BẰNG SÔNG CỬU LONG", "sub": "Cơ hội nổi bật", "cells": [
+    {"province": "Phú Quốc", "color": "#E53935", "jobs": [
+      {"pos": "Giám sát xây dựng", "co": "Nội thất ATC", "sal": "21–35 triệu"},
+      {"pos": "Kỹ sư giám sát XD", "co": "Địa ốc TP - Đảo Phú Quốc", "sal": "Thỏa thuận"}]},
+    {"province": "An Giang", "color": "#1E63D6", "jobs": [
+      {"pos": "Kiểm soát viên (Long Xuyên)", "co": "VietABank", "sal": "Thỏa thuận"},
+      {"pos": "Nhân viên kế toán", "co": "Lương thực A An", "sal": "9–10 triệu"}]},
+    {"province": "Sóc Trăng", "color": "#2E7D32", "jobs": [
+      {"pos": "Kỹ sư hiện trường", "co": "XD và Công nghệ cao HTC", "sal": "15–25 triệu"}]},
+    {"province": "Đồng Tháp", "color": "#8E24AA", "jobs": [
+      {"pos": "NV/CV KH doanh nghiệp", "co": "VPBank", "sal": "Thỏa thuận"}]}
+  ]},
+  "notes": ["Tin còn hạn nộp tại ngày 26/10/2026", "Nhà tuyển dụng thật không thu phí ứng viên", "Nguồn tổng hợp: CareerViet"],
+  "cta": "Inbox để nhận danh sách chi tiết và link ứng tuyển"
+}
