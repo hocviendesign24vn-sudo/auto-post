@@ -9,6 +9,7 @@ const path = require('path');
 const d = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const out = process.argv[3] || 'out';
 fs.mkdirSync(out, { recursive: true });
+const CONTACT = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'brand.json'), 'utf8'));
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, '..', 'assets', 'logo-d24.png')).toString('base64');
 
 const C = { blue1: '#0813DF', blue2: '#0B86E8', navy: '#0A2A8C', orange: '#FF7F14', ink: '#0F1B3D', muted: '#5A6785', green: '#2E8B3E' };
@@ -23,6 +24,10 @@ const ICON = {
   calendar: '<path d="M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2zM5 9v11h14V9H5z"/>',
   coin: '<circle cx="12" cy="12" r="9"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">₫</text>',
   send: '<path d="M2 11l19-8-8 19-2-8-9-3z"/>',
+  phone: '<path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/>',
+  chat: '<path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 6v2h2V9H7zm4 0v2h2V9h-2zm4 0v2h2V9h-2z"/>',
+  globe: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4a14 14 0 0 1 1.9 4h-3.8A14 14 0 0 1 12 4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4H4.3zm.8 2h2.9a15.7 15.7 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.3-3.6A15.7 15.7 0 0 0 8 8zm4 12a14 14 0 0 1-1.9-4h3.8A14 14 0 0 1 12 20zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6a15.7 15.7 0 0 0 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zM16.3 14a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4h-3.4z"/>',
+  mail: '<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 7L4 6v2l8 5 8-5V6l-8 5z"/>',
 };
 const icon = (name, color, size) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}">${ICON[name]}</svg>`;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -73,10 +78,14 @@ body{font-family:Inter,sans-serif;color:${C.ink};background:#EEF4FF}
 .note li:before{content:"✓";color:#fff;background:${C.orange};border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:900}
 .cta{flex:1;border-radius:18px;background:linear-gradient(120deg,${C.navy},${C.blue1} 60%,${C.blue2});color:#fff;display:flex;align-items:center;gap:16px;font-weight:800;line-height:1.25}
 .cta u{text-decoration:none;border-bottom:4px solid ${C.orange}}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.13) 2px,transparent 2px);background-size:26px 26px;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.05),rgba(0,0,0,.9))}
+.contact{display:flex;align-items:center;justify-content:space-between;background:${C.navy};color:#fff;font-weight:700;white-space:nowrap}
+.contact span{display:flex;align-items:center;gap:8px}
+.contact i{font-style:normal;color:#9FB7FF;font-weight:600}
 `;
 
 const hero = (w, h, s) => `
-<div class="hero" style="height:${h}px;padding:${44 * s}px ${48 * s}px">
+<div class="hero" style="height:${h}px;padding:${44 * s}px ${48 * s}px"><div class="dots"></div>
   <div class="logo" style="right:${44 * s}px;top:${40 * s}px;width:${150 * s}px;height:${110 * s}px"><img src="${logo}" style="width:${118 * s}px"></div>
   <div class="t1" style="font-size:${66 * s}px">BẢNG TIN TUYỂN DỤNG</div>
   <div class="t2" style="font-size:${74 * s}px;margin-top:${10 * s}px">TỔNG HỢP</div>
@@ -121,15 +130,23 @@ const foot = s => `<div class="foot">
   <div class="cta" style="padding:${18 * s}px ${24 * s}px;font-size:${23 * s}px">${icon('send', '#fff', 54 * s)}<div><u>${esc(d.cta)}</u></div></div>
 </div>`;
 
+const contactBar = () => `<div class="contact" style="position:absolute;left:0;right:0;bottom:0;height:64px;padding:0 24px;font-size:17px">
+  <span>${icon('phone', C.orange, 22)}<i>Hotline</i> ${esc(CONTACT.hotline)}</span>
+  <span>${icon('chat', C.orange, 22)}<i>Zalo</i> ${esc(CONTACT.zalo)}</span>
+  <span>${icon('globe', C.orange, 22)}${esc(CONTACT.website)}</span>
+  <span>${icon('mail', C.orange, 22)}${esc(CONTACT.email)}</span>
+</div>`;
+
 const facebook = () => `<div class="page" style="width:1080px;height:1350px">
   ${hero(1080, 372, 1)}
   <div style="padding:0 24px;margin-top:-34px;position:relative;z-index:3">${stats(0.82)}</div>
   <div style="display:flex;gap:16px;padding:16px 24px 0">
-    <div style="flex:1;min-width:0">${list(d.lists[0], 0.85, { pos: 17.5, co: 14.5, sal: 15, dl: 13.5, head: 23, sub: 15, rowPad: 13 })}</div>
-    <div style="flex:1;min-width:0">${list(d.lists[1], 0.85, { pos: 17.5, co: 14.5, sal: 15, dl: 13.5, head: 23, sub: 15, rowPad: 13 })}</div>
+    <div style="flex:1;min-width:0">${list(d.lists[0], 0.85, { pos: 17.5, co: 14.5, sal: 15, dl: 13.5, head: 23, sub: 15, rowPad: 9 })}</div>
+    <div style="flex:1;min-width:0">${list(d.lists[1], 0.85, { pos: 17.5, co: 14.5, sal: 15, dl: 13.5, head: 23, sub: 15, rowPad: 9 })}</div>
   </div>
   <div style="padding:16px 24px 0">${grid(d.grid, 0.9, { head: 23, sub: 15, prov: 21, p: 16.5, c: 14.5, m: 15.5 })}</div>
-  <div style="padding:16px 24px 0">${foot(0.92)}</div>
+  <div style="padding:14px 24px 0">${foot(0.84)}</div>
+  ${contactBar()}
 </div>`;
 
 const vFrame = inner => `<div class="page" style="width:1080px;height:1920px;display:flex;flex-direction:column">${inner}</div>`;
