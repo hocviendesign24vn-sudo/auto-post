@@ -15,6 +15,7 @@ import { Outro } from "./scenes/Outro";
 
 export const FPS = 30;
 const T = 20; // độ dài mỗi chuyển cảnh (khung)
+const VOICE_DELAY = 10; // giọng đọc bắt đầu sau khi cảnh vào được 10 khung
 
 // Danh sách cảnh và hiệu ứng chuyển vào cảnh đó.
 const scenes = (d: BangTinData) => {
@@ -25,7 +26,11 @@ const scenes = (d: BangTinData) => {
   ];
   if (d.grid?.cells.length) s.push({ name: d.grid.name, dur: 160, el: <GridScene grid={d.grid} notes={d.notes} /> });
   s.push({ name: "Kết", dur: 190, el: <Outro data={d} /> });
-  return s;
+  // Có giọng đọc thì kéo dài cảnh cho đủ lời, chừa chỗ cho chuyển cảnh kế tiếp.
+  return s.map((x, i) => {
+    const v = d.voice?.[i];
+    return v ? { ...x, dur: Math.max(x.dur, VOICE_DELAY + Math.ceil(v.dur * FPS) + T + 12) } : x;
+  });
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,10 +60,16 @@ export const BangTin: React.FC<BangTinData> = (data) => {
   const s = scenes(data);
   let at = 0;
   const cuts: number[] = [];
+  const starts: number[] = [];
   s.forEach((x, i) => {
     if (i > 0) cuts.push(at - T);
+    starts.push(i > 0 ? at - T : 0);
     at += x.dur - (i > 0 ? T : 0);
   });
+  // Khoảng thời gian có giọng đọc, để hạ nhỏ nhạc nền.
+  const spans = (data.voice ?? []).map((v, i) => [starts[i] + VOICE_DELAY, starts[i] + VOICE_DELAY + Math.ceil(v.dur * FPS)]);
+  const duck = (f: number) =>
+    spans.reduce((m, [a, b]) => Math.min(m, interpolate(f, [a - 8, a, b, b + 12], [1, 0.3, 0.3, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })), 1);
   return (
     <AbsoluteFill style={{ background: C.deep }}>
       <TransitionSeries>
@@ -80,9 +91,16 @@ export const BangTin: React.FC<BangTinData> = (data) => {
       <Audio
         src={staticFile("music.wav")}
         volume={(f) =>
-          interpolate(f, [0, 15, durationInFrames - 45, durationInFrames], [0, 0.6, 0.6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+          interpolate(f, [0, 15, durationInFrames - 45, durationInFrames], [0, 0.6, 0.6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) * duck(f)
         }
       />
+      {(data.voice ?? []).map((v, i) =>
+        i < s.length ? (
+          <Sequence key={`v${i}`} from={starts[i] + VOICE_DELAY} durationInFrames={Math.ceil(v.dur * FPS) + 6} layout="none">
+            <Audio src={staticFile(v.src)} volume={1} />
+          </Sequence>
+        ) : null,
+      )}
       {cuts.map((c, i) => (
         <Sequence key={i} from={Math.max(0, c - 4)} durationInFrames={24} layout="none">
           <Audio src={staticFile("whoosh.wav")} volume={0.45} />

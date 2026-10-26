@@ -10,4 +10,6 @@ export type BangTinData = {
   grid?: { name: string; sub: string; cells: Cell[] };
   notes: string[];
   cta: string;
+  // Giọng đọc từng cảnh (render/voice.py tạo), theo thứ tự cảnh trong video
+  voice?: { src: string; dur: number; text?: string }[];
 };
