@@ -91,7 +91,7 @@ def to_job(d, link, location_id):
     if d.get("location_id") not in [CAN_THO] + MEKONG:
         return None, f"nơi làm việc chính ngoài khu vực ({d.get('location_name_vn')})"
     company = (d.get("emp_name") or d.get("job_contact_company") or "").strip()
-    if not company:
+    if not company or re.fullmatch(r"confidential|bảo mật|giấu tên|ẩn danh|công ty ẩn danh", company, re.I):
         return None, "không có tên công ty"
     deadline = (d.get("job_last_date") or "")[:10]
     if not deadline or deadline < date.today().isoformat():
