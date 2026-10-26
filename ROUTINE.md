@@ -7,7 +7,7 @@
 3. Tìm tin tuyển dụng mới ở Cần Thơ, các tỉnh ĐBSCL và TP.HCM. Mở từng tin gốc, chỉ giữ tin còn hạn, có tên công ty, có cách ứng tuyển và không có dấu hiệu lừa đảo.
 4. Bỏ tin đã có trong tab `Tin tuyen dung` (trùng link gốc) hoặc đã đăng trong 14 ngày.
 5. Ghi tin đạt vào tab `Tin tuyen dung`.
-6. Bài 8:00: ảnh Facebook với 4 tin cùng khu vực. Bài 14:00: video dọc với 3 tin. Tạo JSON theo `examples/sample-data.json`, chạy `render/render.js` và `render/make_video.sh`.
+6. Dùng mẫu thương hiệu D24 "Bảng tin tuyển dụng tổng hợp". Mỗi bài tạo một JSON theo `examples/bangtin-mau.json` (tên vị trí dưới khoảng 26 ký tự, mỗi danh sách tối đa 6 tin, ô ĐBSCL tối đa 4 tỉnh), chạy `node render/bangtin.js <json> out/` rồi `render/make_video.sh out/ out/video.mp4`. Bài 8:00 dùng ảnh `bangtin.png`; bài 14:00 dùng video (với tin khác bài 8:00). Xem lại ảnh trước khi dùng. Mẫu cũ `render/render.js` chỉ để dự phòng.
 7. Viết caption từng kênh theo mẫu trong quy tắc; luôn có link gốc và câu cảnh báo không nộp phí.
 8. Tải ảnh, video, caption lên `03_Cho dang/<ngày>_<giờ>_<chủ đề>/` và thêm 2 dòng vào tab `Lich dang` với trạng thái `Cho dang`.
 

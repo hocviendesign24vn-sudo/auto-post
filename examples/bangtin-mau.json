@@ -1,0 +1,40 @@
+{
+  "date": "26/10/2026",
+  "regionsLine": ["Cần Thơ", "Đồng bằng sông Cửu Long", "TP. Hồ Chí Minh"],
+  "stats": [
+    {"icon": "briefcase", "value": "18", "label": "vị trí\ntuyển dụng"},
+    {"icon": "pin", "value": "6", "label": "tỉnh, thành\ncó việc"},
+    {"icon": "calendar", "value": "31/12", "label": "hạn nộp\nmuộn nhất"}
+  ],
+  "lists": [
+    {"name": "TP. HỒ CHÍ MINH", "sub": "Việc làm mới cập nhật", "theme": "orange", "jobs": [
+      {"pos": "Nhân viên kế toán công nợ", "co": "Advanced Distribution", "sal": "10–13 triệu", "dl": "30/11"},
+      {"pos": "Kỹ sư QS MEP", "co": "DK Build", "sal": "20–28 triệu", "dl": "31/12"},
+      {"pos": "Chuyên viên kỹ thuật điện", "co": "Năng Lượng TTC", "sal": "19–25 triệu", "dl": "24/11"},
+      {"pos": "CV kinh doanh nha khoa", "co": "Orotech", "sal": "20–25 triệu", "dl": "24/11"},
+      {"pos": "Nhân viên lái xe 7 chỗ", "co": "Virbac Việt Nam", "sal": "Thỏa thuận", "dl": "18/11"},
+      {"pos": "Merchandiser", "co": "TMI Việt Nam", "sal": "Thỏa thuận", "dl": "24/11"}
+    ]},
+    {"name": "CẦN THƠ", "sub": "Việc làm đang nhận hồ sơ", "theme": "blue", "jobs": [
+      {"pos": "Giao dịch viên", "co": "BAOVIET Bank", "sal": "7–10 triệu", "dl": "03/11"},
+      {"pos": "Nhân viên kinh doanh", "co": "Điện Máy Gia Khang", "sal": "12–25 triệu", "dl": "12/11"},
+      {"pos": "Kỹ sư thực hành luyện kim", "co": "Thép Tây Đô", "sal": "20–25 triệu", "dl": "20/11"},
+      {"pos": "Phó ca sản xuất luyện", "co": "Thép Tây Đô", "sal": "25–30 triệu", "dl": "20/11"},
+      {"pos": "TP quản lý chất lượng", "co": "An Nam Food", "sal": "Thỏa thuận", "dl": "24/11"},
+      {"pos": "Giám định bồi thường", "co": "Bảo hiểm BIC", "sal": "Thỏa thuận", "dl": "24/11"}
+    ]}
+  ],
+  "grid": {"name": "ĐỒNG BẰNG SÔNG CỬU LONG", "sub": "Cơ hội nổi bật", "cells": [
+    {"province": "An Giang", "color": "#E53935", "jobs": [
+      {"pos": "Kế toán trưởng", "co": "Oriental Garment", "sal": "20–30 triệu"},
+      {"pos": "NV dịch vụ khách hàng", "co": "BV Mặt Trời Phú Quốc", "sal": "18–25 triệu"}]},
+    {"province": "Đồng Tháp", "color": "#1E63D6", "jobs": [
+      {"pos": "Chuyên viên QHKH cá nhân", "co": "LPBank", "sal": "Thỏa thuận"}]},
+    {"province": "Vĩnh Long", "color": "#2E7D32", "jobs": [
+      {"pos": "Chuyên viên thu hồi nợ", "co": "VPBank", "sal": "Thỏa thuận"}]},
+    {"province": "Cà Mau", "color": "#8E24AA", "jobs": [
+      {"pos": "CV phát triển KH cá nhân", "co": "MSB", "sal": "Thỏa thuận"}]}
+  ]},
+  "notes": ["Tin còn hạn nộp tại ngày 26/10/2026", "Nhà tuyển dụng thật không thu phí ứng viên", "Nguồn tổng hợp: CareerViet"],
+  "cta": "Inbox để nhận danh sách chi tiết và link ứng tuyển"
+}

@@ -15,7 +15,9 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 | `autopost/facebook.py` | Đăng ảnh, Reels, bình luận lên Fanpage qua Graph API |
 | `autopost/make.py` | Gửi bài sang kịch bản Make.com để đăng Facebook (dùng thay Graph API) |
 | `autopost/youtube.py` | Tải video Shorts lên YouTube qua YouTube Data API v3 |
-| `render/render.js` | Dựng ảnh Facebook 1080x1350 và các khung video 1080x1920 từ JSON |
+| `render/bangtin.js` | Mẫu thương hiệu D24: ảnh Facebook 1080x1350 và các khung video 1080x1920 từ JSON |
+| `render/render.js` | Mẫu cũ (dự phòng) |
+| `assets/logo-d24.png` | Logo D24 nền trong suốt |
 | `render/make_video.sh` | Ghép khung thành video MP4 dọc |
 | `examples/sample-data.json` | Dữ liệu mẫu (7 tin thật ngày 26/10/2026) |
 | `ROUTINE.md` | Hướng dẫn cho routine soạn bài và đăng bài |
@@ -38,7 +40,7 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 ```bash
 pip install -r requirements.txt
 python -m autopost.facebook check
-node render/render.js examples/sample-data.json out/
+node render/bangtin.js examples/bangtin-mau.json out/
 render/make_video.sh out/ out/post2_video.mp4
 python -m autopost.facebook photo --image out/post1_facebook.png --caption-file caption.txt --draft
 ```
