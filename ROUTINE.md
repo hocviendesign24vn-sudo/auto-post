@@ -27,6 +27,6 @@
 
 1. Trong tab `Tin tuyen dung` (sheet `Lich dang` trên Drive), lấy 1 đến 2 tin chưa có id ở cột `timviecso` (thêm cột này nếu chưa có), ưu tiên tin mới tìm và hạn nộp xa.
 2. Không còn tin chờ thì tìm thêm 1 đến 2 tin mới theo bước 3 và 4 của "Routine soạn bài", ghi vào tab `Tin tuyen dung` trước khi đăng.
-3. Mở lại link tin gốc, kiểm tra còn hạn, rồi viết JSON theo mô tả ở đầu `autopost/timviecso.py`: tiêu đề ngắn gọn, `location` là `TP Cần Thơ`, `TP HCM` hoặc `Đồng bằng sông Cửu Long`, mô tả, yêu cầu, quyền lợi tóm tắt bằng lời mình (không chép nguyên văn), `source` là link tin gốc. Không bịa thông tin: thiếu trường nào thì ghi "Chưa cập nhật" (riêng lương ghi "Thỏa thuận").
+3. Mở lại link tin gốc, kiểm tra còn hạn, rồi viết JSON theo mô tả ở đầu `autopost/timviecso.py`: tiêu đề ngắn gọn, `location` là `TP Cần Thơ`, `TP HCM` hoặc `Đồng bằng sông Cửu Long`, mô tả, yêu cầu, quyền lợi tóm tắt bằng lời mình (không chép nguyên văn), `source` là link tin gốc (logo công ty tự lấy từ tin gốc nếu để trống `employer.logo`; tin không có logo thì để trống). Không bịa thông tin: thiếu trường nào thì ghi "Chưa cập nhật" (riêng lương ghi "Thỏa thuận").
 4. Chạy `python -m autopost.timviecso post <file.json> --dry-run`, xem lại, rồi chạy lại không có `--dry-run`.
 5. Ghi id trả về vào cột `timviecso`. Tin báo `trung` thì ghi `trung`. Tin lỗi thì ghi lỗi vào `Ghi chu / loi`, lần sau thử lại, tối đa 2 lần.

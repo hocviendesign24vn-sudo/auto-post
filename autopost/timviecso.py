@@ -10,6 +10,7 @@ File tin là JSON, một tin hoặc danh sách tin, cùng trường với form t
    "workingTime": "...", "experience": "...", "education": "...", "quantity": 1, "address": "...",
    "description": ["..."], "requirements": ["..."], "benefits": ["..."], "source": "https://link-tin-goc"}
 "source" không có trên trang nên được ghi thành dòng "Nguồn: ..." cuối phần mô tả.
+Để trống employer.logo thì logo được lấy từ ảnh og:image của tin gốc (CareerViet đặt logo công ty ở đó).
 
 Ví dụ:
   python -m autopost.timviecso list
@@ -18,8 +19,10 @@ Ví dụ:
 """
 
 import argparse
+import html
 import json
 import os
+import re
 import sys
 import time
 import unicodedata
@@ -64,6 +67,23 @@ def call(method, url, payload=None):
 
 def list_jobs():
     return call("GET", API) or []
+
+
+# Ảnh chung của trang tuyển dụng, không phải logo công ty.
+GENERIC_LOGO = re.compile(r"careerviet\.vn/(logo/|themes/|content/)|/_next/static/", re.I)
+
+
+def find_logo(source_url):
+    """Lấy URL logo công ty từ thẻ og:image của trang tin gốc; trả về "" nếu không có."""
+    try:
+        resp = requests.get(source_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=TIMEOUT)
+        resp.raise_for_status()
+    except requests.RequestException:
+        return ""
+    m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)', resp.text) or \
+        re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image', resp.text)
+    url = html.unescape(m.group(1)).strip() if m else ""
+    return url if url.startswith("https://") and not GENERIC_LOGO.search(url) else ""
 
 
 def _key(text):
@@ -112,6 +132,9 @@ def post_jobs(jobs, dry_run=False):
     for job in jobs:
         title = job.get("title")
         try:
+            emp = job.setdefault("employer", {})
+            if not emp.get("logo") and job.get("source"):
+                emp["logo"] = find_logo(job["source"])
             payload = build_payload(job)
             if job_key(payload) in seen:
                 results.append({"title": title, "status": "trung"})
