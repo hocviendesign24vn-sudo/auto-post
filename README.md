@@ -2,12 +2,16 @@
 
 Tự động tìm tin tuyển dụng ở Cần Thơ, ĐBSCL và TP.HCM, dựng bài và đăng lên Facebook Fanpage, TikTok, YouTube Shorts lúc 8:00 và 14:00 (giờ Việt Nam).
 
+Đường đăng chính: **Buffer** (`autopost/buffer.py`), ảnh/video lấy URL công khai từ nhánh `media` (`autopost/media.py`). Các module `facebook`, `youtube`, `make` là phương án dự phòng.
+
 Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post** (sheet `Lich dang`, file quy tắc trong `00_Thuong hieu`).
 
 ## Cấu trúc
 
 | Đường dẫn | Việc |
 | --- | --- |
+| `autopost/buffer.py` | Đăng lên Facebook, TikTok, YouTube qua Buffer GraphQL API |
+| `autopost/media.py` | Đưa ảnh/video lên nhánh `media` để có URL công khai |
 | `autopost/facebook.py` | Đăng ảnh, Reels, bình luận lên Fanpage qua Graph API |
 | `autopost/make.py` | Gửi bài sang kịch bản Make.com để đăng Facebook (dùng thay Graph API) |
 | `autopost/youtube.py` | Tải video Shorts lên YouTube qua YouTube Data API v3 |
@@ -22,6 +26,7 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 
 | Biến | Ý nghĩa |
 | --- | --- |
+| `BUFFER_API_KEY` | Khóa API Buffer (đường đăng chính) |
 | `FB_PAGE_ID` | ID Fanpage |
 | `FB_PAGE_TOKEN` | Page Access Token dài hạn, quyền `pages_manage_posts` |
 | `MAKE_WEBHOOK_URL` | Webhook kịch bản Make đăng Facebook (bí mật) |
