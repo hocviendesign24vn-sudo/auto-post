@@ -1,7 +1,8 @@
 """Quét tin mới nhất trên CareerViet (Cần Thơ và các tỉnh ĐBSCL) rồi đăng lên timviecso.vn/design24/jobs.
 
-Chạy 5 phút một lần bằng GitHub Actions (.github/workflows/quet-tin.yml), không cần Claude.
-Mỗi lượt đăng tối đa --max tin mới; hết tin mới thì thoát, lượt sau quét lại.
+Chạy bằng GitHub Actions (.github/workflows/quet-tin.yml), không cần Claude. Lịch của GitHub
+hay trễ, nên mỗi lần chạy giữ máy khoảng 50 phút và tự quét 5 phút một lần (--loop-minutes, --every).
+Mỗi lượt đăng tối đa --max tin mới (mặc định 2, để tin lên đều); hết tin mới thì chờ lượt sau.
 Tác vụ Claude mỗi giờ rà lại các tin đã đăng và gỡ tin có vấn đề.
 
 Lọc cố định: còn hạn nộp, có tên công ty (bỏ tin ẩn danh), không có dấu hiệu thu phí,
@@ -9,7 +10,8 @@ chưa có trên trang (so link gốc và tên công ty + tiêu đề).
 
 Ví dụ:
   python -m autopost.careerviet --dry-run
-  python -m autopost.careerviet --max 5
+  python -m autopost.careerviet --max 2
+  python -m autopost.careerviet --max 2 --loop-minutes 50 --every 5
 """
 
 import argparse
@@ -17,7 +19,8 @@ import html
 import json
 import re
 import sys
-from datetime import date
+import time
+from datetime import date, datetime
 
 import requests
 
@@ -83,8 +86,10 @@ def experience(d):
 
 def to_job(d, link, location_id):
     """Chuyển tin CareerViet sang dạng tin của timviecso; trả về (tin, lý do loại)."""
-    if not d.get("job_is_public", 1) or d.get("job_is_security"):
-        return None, "ẩn hoặc không công khai"
+    if d.get("job_is_public") == 0:
+        return None, "tin không công khai"
+    if d.get("location_id") not in [CAN_THO] + MEKONG:
+        return None, f"nơi làm việc chính ngoài khu vực ({d.get('location_name_vn')})"
     company = (d.get("emp_name") or d.get("job_contact_company") or "").strip()
     if not company:
         return None, "không có tên công ty"
@@ -151,12 +156,26 @@ def scan(max_posts, dry_run=False, max_checks=80):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--max", type=int, default=5, help="Số tin đăng tối đa mỗi lượt (mặc định 5)")
+    p.add_argument("--max", type=int, default=2, help="Số tin đăng tối đa mỗi lượt (mặc định 2)")
     p.add_argument("--dry-run", action="store_true", help="Chỉ in tin sẽ đăng, không đăng")
+    p.add_argument("--loop-minutes", type=float, default=0, help="Chạy lặp trong bấy nhiêu phút (0 = quét một lần)")
+    p.add_argument("--every", type=float, default=5, help="Khoảng cách giữa các lượt quét, phút")
     args = p.parse_args(argv)
-    report = scan(args.max, dry_run=args.dry_run)
-    print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 1 if any(r["status"] == "loi" for r in report["ket_qua"]) else 0
+    end = time.monotonic() + args.loop_minutes * 60
+    errors = 0
+    while True:
+        start = time.monotonic()
+        try:
+            report = scan(args.max, dry_run=args.dry_run)
+        except Exception as exc:  # một lượt lỗi (mạng, trang đổi) không được dừng cả vòng lặp
+            report = {"loi": str(exc), "ket_qua": []}
+        errors += sum(r["status"] == "loi" for r in report["ket_qua"]) + ("loi" in report)
+        print(datetime.now().strftime("%H:%M:%S"), json.dumps(report, ensure_ascii=False), flush=True)
+        wait = args.every * 60 - (time.monotonic() - start)
+        if time.monotonic() + wait >= end:
+            break
+        time.sleep(max(0, wait))
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
