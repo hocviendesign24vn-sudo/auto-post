@@ -25,13 +25,15 @@
 
 ## Đăng timviecso.vn
 
-### Quét tự động 5 phút một lần (GitHub Actions, không có Claude)
+### Đăng tự động khoảng 2 giờ một tin (GitHub Actions, không có Claude)
 
-`.github/workflows/quet-tin.yml` chạy `python -m autopost.careerviet --max 2 --loop-minutes 50 --every 5`: lấy tin mới nhất trên CareerViet ở Cần Thơ và các tỉnh ĐBSCL, lọc cố định (còn hạn, có tên công ty, không có dấu hiệu thu phí, chưa có trên trang), tự gắn logo và link nguồn, đăng tối đa 2 tin mỗi lượt quét 5 phút (mỗi lần chạy giữ máy khoảng 50 phút và tự quét lặp, vì lịch GitHub hay trễ), chỉ lấy tin có nơi làm việc chính ở Cần Thơ hoặc ĐBSCL. Không có tin mới thì chờ lượt sau.
+`.github/workflows/quet-tin.yml` chạy `python -m autopost.careerviet --max 1` mỗi 2 giờ: lấy tin mới nhất trên CareerViet có nơi làm việc chính ở Cần Thơ hoặc ĐBSCL, lọc cố định (còn hạn, có tên công ty, không có dấu hiệu thu phí, chưa có trên trang), tự gắn logo và link nguồn, đăng 1 tin. Không có tin mới thì chờ lượt sau.
 
-### Routine rà soát timviecso.vn (mỗi giờ, có Claude)
+### Routine rà soát timviecso.vn (tạm dừng)
 
-1. Chạy `python -m autopost.timviecso list` và lấy các tin đăng trong khoảng 2 giờ gần nhất.
+Tác vụ này đang tắt. Khi bật lại:
+
+1. Chạy `python -m autopost.timviecso list` và lấy các tin đăng từ lần rà trước.
 2. Với mỗi tin, mở link "Nguồn: ..." ở cuối mô tả. Gỡ tin (`python -m autopost.timviecso delete <id> --reason "..."`) nếu: tin gốc đã gỡ hoặc hết hạn, công ty đáng ngờ, có dấu hiệu thu phí hay lừa đảo, sai khu vực, hoặc nội dung lỗi nặng (trống, sai lương, sai công ty).
 3. Tin chỉ có lỗi nhỏ (dòng thừa như "Phúc lợi:", yêu cầu phân biệt còn sót) thì gỡ rồi đăng lại bản đã sửa bằng `python -m autopost.timviecso post <file.json>`.
 4. Đăng thêm tối đa 3 tin TP.HCM mới nhất đã xác minh, theo cách của tác vụ cũ: JSON theo mô tả đầu `autopost/timviecso.py`, `location` là `TP HCM`, tóm tắt bằng lời mình, `source` là link gốc, để trống logo để chương trình tự lấy.

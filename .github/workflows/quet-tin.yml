@@ -1,11 +1,9 @@
 name: Quét tin CareerViet, đăng timviecso.vn
 
-# Lịch của GitHub hay trễ hoặc bỏ lượt, nên mỗi lần chạy giữ máy khoảng 50 phút và tự quét
-# 5 phút một lần. Lịch 15 phút chỉ để có sẵn lần chạy kế tiếp: concurrency giữ đúng một lần
-# đang chạy và một lần chờ, lần chạy chờ bắt đầu ngay khi lần trước xong.
+# Khoảng 2 giờ đăng 1 tin mới nhất (Cần Thơ, ĐBSCL). Lịch GitHub có thể trễ vài chục phút.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7 */2 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -15,13 +13,13 @@ concurrency:
 jobs:
   quet:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: python -m autopost.careerviet --max 2 --loop-minutes 50 --every 5
+      - run: python -m autopost.careerviet --max 1
         env:
           TIMVIECSO_TOKEN: ${{ secrets.TIMVIECSO_TOKEN }}
