@@ -16,7 +16,9 @@
 1. Lấy dòng `Lich dang` đúng ngày và khung giờ, trạng thái `Cho dang`.
 2. Tải file từ thư mục bài trên Drive.
 3. Chạy `python -m autopost.media <file...> --folder <ngày>` để lấy URL công khai.
-4. Chạy `python -m autopost.buffer channels` để lấy id kênh (lưu lại trong ghi chú sheet cho lần sau).
-5. Đăng ngay qua Buffer cho từng kênh: 8:00 dùng `--image-url` cho Facebook; 14:00 dùng `--video-url` cho TikTok, YouTube và Facebook (Reels).
+4. Lấy id kênh trong `channels.json` (kiểm tra lại bằng `python -m autopost.buffer channels` nếu đăng lỗi).
+5. Đăng ngay qua Buffer cho từng kênh, luôn kèm `--service <mạng>`:
+   - 8:00: Facebook, `--image-url`.
+   - 14:00: TikTok và YouTube với `--video-url --title "<tiêu đề>"`; Facebook với `--video-url` (tự đăng dạng Reels).
 6. Ghi id/link bài vào `Lich dang`, đổi trạng thái thành `Da dang`, chuyển thư mục bài sang `05_Da dang`, ghi giờ đăng vào tab `Tin tuyen dung`.
 7. Kênh lỗi: ghi lỗi vào cột `Ghi chu / loi`, gửi email báo chủ Trang, không đăng lại quá 2 lần.
