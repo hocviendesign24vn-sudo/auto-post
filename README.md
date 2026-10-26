@@ -9,6 +9,7 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 | Đường dẫn | Việc |
 | --- | --- |
 | `autopost/facebook.py` | Đăng ảnh, Reels, bình luận lên Fanpage qua Graph API |
+| `autopost/make.py` | Gửi bài sang kịch bản Make.com để đăng Facebook (dùng thay Graph API) |
 | `autopost/youtube.py` | Tải video Shorts lên YouTube qua YouTube Data API v3 |
 | `render/render.js` | Dựng ảnh Facebook 1080x1350 và các khung video 1080x1920 từ JSON |
 | `render/make_video.sh` | Ghép khung thành video MP4 dọc |
@@ -23,6 +24,7 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 | --- | --- |
 | `FB_PAGE_ID` | ID Fanpage |
 | `FB_PAGE_TOKEN` | Page Access Token dài hạn, quyền `pages_manage_posts` |
+| `MAKE_WEBHOOK_URL` | Webhook kịch bản Make đăng Facebook (bí mật) |
 | `YT_CLIENT_ID`, `YT_CLIENT_SECRET` | OAuth client của dự án Google Cloud |
 | `YT_REFRESH_TOKEN` | Refresh token có quyền `youtube.upload` |
 

@@ -15,6 +15,6 @@
 
 1. Lấy dòng `Lich dang` đúng ngày và khung giờ, trạng thái `Cho dang`.
 2. Tải file từ thư mục bài trên Drive.
-3. Đăng: 8:00 dùng `python -m autopost.facebook photo`, 14:00 dùng `python -m autopost.facebook reel` (TikTok, YouTube bổ sung sau khi có API).
+3. Đăng Facebook qua Make: 8:00 dùng `python -m autopost.make photo --drive-file-id <id ảnh>`, 14:00 dùng `python -m autopost.make video --drive-file-id <id video>` (khi có Page token riêng thì chuyển sang `autopost.facebook`) (TikTok, YouTube bổ sung sau khi có API).
 4. Ghi link bài vào `Lich dang`, đổi trạng thái thành `Da dang`, chuyển thư mục bài sang `05_Da dang`, ghi giờ đăng vào tab `Tin tuyen dung`.
 5. Kênh lỗi: ghi lỗi vào cột `Ghi chu / loi`, gửi email báo chủ Trang, không đăng lại quá 2 lần.
