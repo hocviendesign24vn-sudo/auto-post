@@ -144,8 +144,8 @@ def job_line(j):
     return f"{pos}. {pay[:1].upper() + pay[1:]}."  # tên công ty đã hiện trên màn hình
 
 
-def script(d):
-    """Lời đọc theo đúng thứ tự cảnh trong video/src/BangTin.tsx.
+def script_basic(d):
+    """Lời đọc cho mẫu cũ video/src/BangTin.tsx.
     Câu ngắn, nhiều dấu chấm phẩy để giọng ngắt nhịp tự nhiên; bỏ qua tên tiếng Anh khó đọc."""
     lines = []
     regions = ", ".join(d["regionsLine"][:-1]) + ", và " + d["regionsLine"][-1]
@@ -172,6 +172,129 @@ def script(d):
         f"Muốn ứng tuyển? Hãy nhắn tin cho trang Đì sai hai bốn, hoặc Da lô, số {phone(CONTACT['zalo'])}. "
         "Lưu ý! Nhà tuyển dụng thật, không bao giờ thu phí ứng viên."
     )
+    return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
+
+
+INDUSTRY = [  # giống video/src/derive.ts
+    ("xây dựng, kỹ thuật", r"xây dựng|thi công|chỉ huy|kỹ sư|giám sát|hiện trường|qs|mep|cơ điện|kỹ thuật|bảo trì|điện lạnh"),
+    ("kế toán, tài chính", r"kế toán|tài chính|kiểm soát|thu hồi nợ|accountant"),
+    ("kinh doanh, bán hàng", r"kinh doanh|sales|bán hàng|thị trường|khách hàng|merchandiser|qhkh"),
+    ("sản xuất, chất lượng", r"sản xuất|đúc|luyện|quality|chất lượng|xưởng|r&d"),
+    ("ngân hàng, bảo hiểm", r"giao dịch viên|ngân hàng|bảo hiểm|giám định"),
+    ("vận tải, dịch vụ", r".*"),
+]
+# Thứ tự trong derive.ts quyết định ngành; ở đây dò theo đúng thứ tự đó
+INDUSTRY_ORDER = ["kế toán, tài chính", "xây dựng, kỹ thuật", "kinh doanh, bán hàng", "sản xuất, chất lượng", "ngân hàng, bảo hiểm", "vận tải, dịch vụ"]
+NUM_WORDS = "không một hai ba bốn năm sáu bảy tám chín mười".split()
+
+
+def industry(pos):
+    table = dict(INDUSTRY)
+    return next(k for k in INDUSTRY_ORDER if re.search(table[k], pos, re.I))
+
+
+def sal_max(sal):
+    nums = [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:[.,]\d+)?", sal)]
+    return max(nums) if nums else None
+
+
+def count_word(n):
+    return NUM_WORDS[n] if n <= 10 else str(n)
+
+
+def region_name(name):
+    return title(name) if name.isupper() else name
+
+
+def pay_text(sal):
+    s = sal.strip()
+    if s.lower().startswith("thỏa thuận"):
+        return "lương thỏa thuận"
+    if s.lower().startswith("đến"):
+        return "lương lên " + s.lower()
+    return "lương từ " + s
+
+
+def script(d):
+    """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
+    mở đầu, bản đồ, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
+    Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
+    jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
+    if d.get("grid"):
+        jobs += [dict(j, region=c["province"]) for c in d["grid"]["cells"] for j in c["jobs"]]
+    total = len(jobs)
+    top = max((sal_max(j["sal"]) or 0) for j in jobs)
+    lines = []
+    lines.append(
+        f"Đì sai hai bốn xin chào! Bạn đang tìm việc ở Cần Thơ, miền Tây, hay Thành phố Hồ Chí Minh? "
+        f"Hôm nay, có tới {total} việc làm mới. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
+    )
+    # Bản đồ
+    parts = ["Cùng xem bản đồ việc làm nhé."]
+    for l in d["lists"]:
+        parts.append(f"{region_name(l['name'])}, có {count_word(len(l['jobs']))} vị trí.")
+    if d.get("grid"):
+        provs = [c["province"] for c in d["grid"]["cells"]]
+        parts.append("Miền Tây có thêm cơ hội ở " + ", ".join(provs[:-1]) + (", và " + provs[-1] if len(provs) > 1 else provs[0]) + ".")
+    lines.append(fit(parts, "", limit=260))
+    # Ngành nghề
+    counts = {}
+    for j in jobs:
+        k = industry(j["pos"])
+        counts[k] = counts.get(k, 0) + 1
+    ranked = sorted(counts.items(), key=lambda x: -x[1])
+    s = f"Ngành tuyển nhiều nhất hôm nay, là {ranked[0][0]}, với {count_word(ranked[0][1])} vị trí."
+    if len(ranked) > 1:
+        s += f" Tiếp theo là {ranked[1][0]}, với {count_word(ranked[1][1])} vị trí."
+    lines.append(s)
+    # Top lương
+    tops = sorted([j for j in jobs if sal_max(j["sal"])], key=lambda j: -sal_max(j["sal"]))
+    readable_tops = [(j, readable(j["pos"])) for j in tops]
+    readable_tops = [(j, p) for j, p in readable_tops if p][:3]
+    if readable_tops:
+        j0, p0 = readable_tops[0]
+        s = f"Và đây, là top lương cao nhất! Đứng đầu là {lower_first(p0)}, {pay_text(j0['sal'])}."
+        rest = [f"{lower_first(p)} ở {region_name(j['region']) if j['region'].isupper() else j['region']}" for j, p in readable_tops[1:]]
+        if rest:
+            s += " Theo sau là " + ", và ".join(rest) + "."
+        lines.append(s)
+    else:
+        lines.append("Và đây, là những vị trí có mức lương hấp dẫn nhất hôm nay!")
+    # Từng khu vực
+    for l in d["lists"]:
+        ranked_jobs = sorted(l["jobs"], key=lambda j: -(sal_max(j["sal"]) or 0))
+        star = next((j for j in ranked_jobs if readable(j["pos"])), None)
+        others = [readable(j["pos"]) for j in l["jobs"] if j is not star]
+        others = [o for o in others if o]
+        s = f"Tại {region_name(l['name'])}."
+        if star:
+            co = readable(star["co"])
+            s += f" Việc nổi bật là {lower_first(readable(star['pos']))}"
+            s += f", ở {co}" if co else ""
+            s += f". {pay_text(star['sal'])[:1].upper() + pay_text(star['sal'])[1:]}"
+            s += f", hạn nộp ngày {star['dl']}." if star.get("dl") else "."
+        tail = f"Ngoài ra, còn {count_word(len(l['jobs']) - 1)} vị trí khác"
+        if others:
+            tail += ", như " + lower_first(others[0])
+        lines.append(fit([s], tail + ".", limit=280))
+    # Miền Tây
+    if d.get("grid") and d["grid"]["cells"]:
+        parts = ["Về miền Tây."]
+        for n, c in enumerate(d["grid"]["cells"]):
+            j = next((j for j in c["jobs"] if readable(j["pos"])), None)
+            if not j:
+                continue
+            m = sal_max(j["sal"])
+            extra = f", lương tới {int(m)} triệu" if m and n == 0 else ""
+            parts.append(f"{c['province']}, đang cần {lower_first(readable(j['pos']))}{extra}.")
+        lines.append(fit(parts, "", limit=260))
+    # 3 bước + chống lừa đảo
+    lines.append(
+        "Ứng tuyển chỉ với ba bước. Một, chọn việc phù hợp. Hai, nhắn Da lô, hoặc phan pết Đì sai hai bốn. "
+        "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
+    )
+    # Kết
+    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới lúc tám giờ sáng, và hai giờ chiều mỗi ngày nhé!")
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 
@@ -254,10 +377,11 @@ def main(argv=None):
     p.add_argument("--out", help="ghi JSON bảng tin kèm trường voice")
     p.add_argument("--voice", default=os.environ.get("VBEE_VOICE", DEFAULT_VOICE))
     p.add_argument("--speed", type=float, default=float(os.environ.get("VBEE_SPEED", DEFAULT_SPEED)))
+    p.add_argument("--style", choices=["pro", "basic"], default="pro", help="pro: mẫu BangTinPro; basic: mẫu cũ")
     p.add_argument("--dry-run", action="store_true", help="chỉ in lời đọc, không gọi Vbee")
     a = p.parse_args(argv)
     data = json.loads(Path(a.json).read_text(encoding="utf-8"))
-    lines = script(data)
+    lines = script(data) if a.style == "pro" else script_basic(data)
     if a.dry_run:
         for i, line in enumerate(lines):
             print(f"[{i}] ({len(line)} ký tự) {line}")
