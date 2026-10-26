@@ -299,6 +299,15 @@ def script(d):
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 
+def caption(line):
+    """Chữ hiện trên phụ đề: đổi cách đọc phiên âm về chữ viết gốc (Da lô -> Zalo, số điện thoại...)."""
+    for word, spoken_form in sorted(PRON["doc"].items(), key=lambda x: -len(x[1])):
+        if word[:1].isupper() or "." in word:
+            line = re.sub(re.escape(spoken_form), word, line, flags=re.I)
+    line = line.replace(phone(CONTACT["zalo"]), CONTACT["zalo"])
+    return line.replace("phan pết", "Fanpage")
+
+
 def _headers():
     h = {"Content-Type": "application/json"}
     if os.environ.get("VBEE_APP_ID"):
@@ -447,6 +456,7 @@ def main(argv=None):
     if a.dry_run:
         for i, line in enumerate(lines):
             print(f"[{i}] ({len(line)} ký tự) {line}")
+            print(f"     phụ đề: {caption(line)}")
         return 0
     voice = resolve_voice(a.voice)
     slug = time.strftime("%Y%m%d-%H%M%S")
@@ -456,7 +466,7 @@ def main(argv=None):
     for i, line in enumerate(lines):
         f = folder / f"{i}.mp3"
         tts(line, voice, f, a.speed)
-        data["voice"].append({"src": f"voice/{slug}/{i}.mp3", "dur": round(duration(f), 2), "text": line})
+        data["voice"].append({"src": f"voice/{slug}/{i}.mp3", "dur": round(duration(f), 2), "text": caption(line)})
     Path(a.out).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(a.out)
     return 0
