@@ -24,6 +24,7 @@ import requests
 
 API = "https://api.vbee.vn/v1/tts"
 VOICES_API = "https://vbee.vn/api/public/v1/voices"
+LEGACY_API = "https://vbee.vn/api/v1/tts"
 DEFAULT_VOICE = "s_cantho_male_nguyenhoaianhdemo_zero_shot_story_vc"  # giọng clone Nguyễn Hoài Anh
 DEFAULT_SPEED = "1.0"
 MAX_CHARS = 300
@@ -307,7 +308,59 @@ def _headers():
     return h
 
 
-def tts(text, voice, path, speed=1.05):
+def _download(url, path):
+    r = requests.get(url, timeout=120)
+    r.raise_for_status()
+    path.write_bytes(r.content)
+
+
+def tts_batch(text, voice, path, speed=1.0):
+    """Batch API (mode async): dùng cho giọng clone mà Realtime API chưa hỗ trợ. Hỏi lại kết quả mỗi 2 giây."""
+    r = requests.post(API, headers=_headers(), timeout=120, json={
+        "text": text, "mode": "async", "voiceCode": voice, "outputFormat": "mp3", "bitrate": 128, "speed": speed,
+        "webhookUrl": "https://example.com/vbee-webhook"})
+    if not r.ok:
+        raise SystemExit(f"Vbee batch lỗi: {r.status_code} {r.text[:300]}")
+    rid = r.json().get("requestId") or r.json().get("result", {}).get("requestId")
+    for _ in range(90):
+        time.sleep(2)
+        g = requests.get(f"{API}/requests/{rid}", headers=_headers(), timeout=60)
+        if not g.ok:
+            continue
+        body = g.json()
+        body = body.get("result", body)
+        if body.get("status") == "COMPLETED" and body.get("audioLink"):
+            _download(body["audioLink"], path)
+            return
+        if body.get("status") == "FAILED":
+            raise SystemExit(f"Vbee batch thất bại: {json.dumps(body, ensure_ascii=False)[:300]}")
+    raise SystemExit(f"Vbee batch quá thời gian chờ (request {rid})")
+
+
+def tts_legacy(text, voice, path, speed=1.0):
+    """API cũ trên vbee.vn (cần Network secret cho host vbee.vn và biến VBEE_APP_ID hoặc header App-Id)."""
+    body = {"app_id": os.environ.get("VBEE_APP_ID", ""), "response_type": "indirect", "callback_url": "https://example.com/vbee-webhook",
+            "input_text": text, "voice_code": voice, "audio_type": "mp3", "bitrate": 128, "speed_rate": round(speed, 1)}
+    r = requests.post(LEGACY_API, headers=_headers(), timeout=120, json=body)
+    if not r.ok or r.json().get("status") != 1:
+        raise SystemExit(f"Vbee (API cũ) lỗi: {r.status_code} {r.text[:300]}")
+    rid = r.json()["result"]["request_id"]
+    for _ in range(90):
+        time.sleep(2)
+        g = requests.get(f"{LEGACY_API}/{rid}", headers=_headers(), timeout=60)
+        if not g.ok:
+            continue
+        res = g.json().get("result", {})
+        if res.get("status") == "SUCCESS" and res.get("audio_link"):
+            _download(res["audio_link"], path)
+            return
+        if res.get("status") == "FAILURE":
+            raise SystemExit(f"Vbee (API cũ) thất bại: {json.dumps(res, ensure_ascii=False)[:300]}")
+    raise SystemExit(f"Vbee (API cũ) quá thời gian chờ (request {rid})")
+
+
+def tts(text, voice, path, speed=1.0):
+    """Thử Realtime API; giọng nào Realtime báo không có (thường là giọng clone) thì chuyển sang Batch, rồi API cũ."""
     last = None
     for attempt in range(1, 4):
         try:
@@ -320,10 +373,19 @@ def tts(text, voice, path, speed=1.05):
                 path.write_bytes(r.content)
                 return
             last = f"{r.status_code} {r.text[:300]}"
-            if r.status_code < 500 and r.status_code != 429:
+            if r.status_code == 400 and "voice" in r.text.lower():
                 break
+            if r.status_code < 500 and r.status_code != 429:
+                raise SystemExit(f"Vbee lỗi: {last}")
         time.sleep(2 ** attempt)
-    raise SystemExit(f"Vbee lỗi: {last}")
+    errors = [f"realtime: {last}"]
+    for fn in (tts_batch, tts_legacy):
+        try:
+            fn(text, voice, path, speed)
+            return
+        except (SystemExit, requests.RequestException) as exc:
+            errors.append(f"{fn.__name__}: {exc}")
+    raise SystemExit("Vbee lỗi với mọi API: " + " | ".join(errors))
 
 
 def duration(path):
