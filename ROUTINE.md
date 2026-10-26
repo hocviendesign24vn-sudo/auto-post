@@ -22,3 +22,11 @@
    - 14:00: TikTok và YouTube với `--video-url --title "<tiêu đề>"`; Facebook với `--video-url` (tự đăng dạng Reels).
 6. Ghi id/link bài vào `Lich dang`, đổi trạng thái thành `Da dang`, chuyển thư mục bài sang `05_Da dang`, ghi giờ đăng vào tab `Tin tuyen dung`.
 7. Kênh lỗi: ghi lỗi vào cột `Ghi chu / loi`, gửi email báo chủ Trang, không đăng lại quá 2 lần.
+
+## Routine đăng timviecso.vn (2 giờ một lần, 7:00 đến 21:00)
+
+1. Trong tab `Tin tuyen dung` (sheet `Lich dang` trên Drive), lấy 1 đến 2 tin chưa có id ở cột `timviecso` (thêm cột này nếu chưa có), ưu tiên tin mới tìm và hạn nộp xa.
+2. Không còn tin chờ thì tìm thêm 1 đến 2 tin mới theo bước 3 và 4 của "Routine soạn bài", ghi vào tab `Tin tuyen dung` trước khi đăng.
+3. Mở lại link tin gốc, kiểm tra còn hạn, rồi viết JSON theo mô tả ở đầu `autopost/timviecso.py`: tiêu đề ngắn gọn, `location` là `TP Cần Thơ`, `TP HCM` hoặc `Đồng bằng sông Cửu Long`, mô tả, yêu cầu, quyền lợi tóm tắt bằng lời mình (không chép nguyên văn), `source` là link tin gốc. Không bịa thông tin: thiếu trường nào thì ghi "Chưa cập nhật" (riêng lương ghi "Thỏa thuận").
+4. Chạy `python -m autopost.timviecso post <file.json> --dry-run`, xem lại, rồi chạy lại không có `--dry-run`.
+5. Ghi id trả về vào cột `timviecso`. Tin báo `trung` thì ghi `trung`. Tin lỗi thì ghi lỗi vào `Ghi chu / loi`, lần sau thử lại, tối đa 2 lần.
