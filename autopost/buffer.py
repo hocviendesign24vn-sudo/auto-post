@@ -1,7 +1,8 @@
 """Đăng bài lên Facebook, TikTok, YouTube qua Buffer GraphQL API.
 
-Cần biến môi trường:
-  BUFFER_API_KEY  khóa API tạo ở https://publish.buffer.com/settings/api
+Xác thực: tạo khóa ở https://publish.buffer.com/settings/api rồi lưu thành Network secret
+của môi trường Claude (host api.buffer.com, header Authorization: Bearer <khóa>).
+Chạy ở nơi khác thì đặt biến môi trường BUFFER_API_KEY.
 
 Buffer không nhận file tải lên: ảnh/video phải có URL công khai, cố định (xem autopost/media.py).
 
@@ -31,10 +32,12 @@ class BufferError(RuntimeError):
 
 def gql(query, variables=None):
     """Gửi một truy vấn GraphQL, thử lại khi lỗi mạng, 429 hoặc 5xx."""
+    # Khóa thường do Network secret của môi trường Claude gắn vào ở proxy;
+    # BUFFER_API_KEY chỉ cần khi chạy ở nơi khác.
     key = os.environ.get("BUFFER_API_KEY")
-    if not key:
-        raise BufferError("Thiếu BUFFER_API_KEY trong biến môi trường")
-    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
     last = None
     for attempt in range(1, RETRIES + 1):
         try:

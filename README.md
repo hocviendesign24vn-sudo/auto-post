@@ -26,7 +26,7 @@ Dữ liệu và lịch đăng nằm trên Google Drive, thư mục **Auto Post**
 
 | Biến | Ý nghĩa |
 | --- | --- |
-| `BUFFER_API_KEY` | Khóa API Buffer (đường đăng chính) |
+| `BUFFER_API_KEY` | Khóa API Buffer. Trên Claude nên lưu thành Network secret (host `api.buffer.com`, header `Authorization: Bearer <khóa>`) thay vì biến này |
 | `FB_PAGE_ID` | ID Fanpage |
 | `FB_PAGE_TOKEN` | Page Access Token dài hạn, quyền `pages_manage_posts` |
 | `MAKE_WEBHOOK_URL` | Webhook kịch bản Make đăng Facebook (bí mật) |
