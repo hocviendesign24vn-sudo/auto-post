@@ -16,6 +16,7 @@ Ví dụ:
   python -m autopost.timviecso list
   python -m autopost.timviecso post tin.json --dry-run
   python -m autopost.timviecso post tin.json
+  python -m autopost.timviecso delete <id> --reason "..."
 """
 
 import argparse
@@ -157,7 +158,15 @@ def main(argv=None):
     pp = sub.add_parser("post", help="Đăng tin từ file JSON")
     pp.add_argument("file")
     pp.add_argument("--dry-run", action="store_true", help="Chỉ kiểm tra và in nội dung, không đăng")
+    pd = sub.add_parser("delete", help="Gỡ một tin khỏi trang")
+    pd.add_argument("id")
+    pd.add_argument("--reason", required=True, help="Lý do gỡ, in ra để ghi nhật ký")
     args = p.parse_args(argv)
+
+    if args.cmd == "delete":
+        call("DELETE", f"{API}/{args.id}")
+        print(f"Đã gỡ {args.id}: {args.reason}")
+        return 0
 
     if args.cmd == "list":
         for j in list_jobs():

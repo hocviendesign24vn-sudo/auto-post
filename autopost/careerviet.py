@@ -1,0 +1,163 @@
+"""Quét tin mới nhất trên CareerViet (Cần Thơ và các tỉnh ĐBSCL) rồi đăng lên timviecso.vn/design24/jobs.
+
+Chạy 5 phút một lần bằng GitHub Actions (.github/workflows/quet-tin.yml), không cần Claude.
+Mỗi lượt đăng tối đa --max tin mới; hết tin mới thì thoát, lượt sau quét lại.
+Tác vụ Claude mỗi giờ rà lại các tin đã đăng và gỡ tin có vấn đề.
+
+Lọc cố định: còn hạn nộp, có tên công ty (bỏ tin ẩn danh), không có dấu hiệu thu phí,
+chưa có trên trang (so link gốc và tên công ty + tiêu đề).
+
+Ví dụ:
+  python -m autopost.careerviet --dry-run
+  python -m autopost.careerviet --max 5
+"""
+
+import argparse
+import html
+import json
+import re
+import sys
+from datetime import date
+
+import requests
+
+from autopost import timviecso
+
+SITE = "https://careerviet.vn"
+DETAIL = "https://internal-api.careerviet.vn/api/v1/js/jsk/jobs/detail/public"
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+TIMEOUT = 60
+CAN_THO = 71
+# An Giang, Bạc Liêu, Bến Tre, Cà Mau, Đồng Tháp, Hậu Giang, Kiên Giang, Sóc Trăng,
+# Tiền Giang, Trà Vinh, Vĩnh Long, "Mekong Delta" (mã tỉnh của CareerViet; Long An đã nhập vào Tây Ninh).
+MEKONG = [76, 781, 75, 78, 67, 780, 77, 79, 73, 74, 70, 1064]
+JOB_LINK = re.compile(r"/vi/tim-viec-lam/[a-z0-9-]+\.([0-9A-F]{8})\.html")
+# Dấu hiệu tin đòi tiền người lao động.
+SCAM = re.compile(r"đặt cọc|nộp phí|phí hồ sơ|phí đào tạo|phí đồng phục|đóng phí|chuyển khoản trước|"
+                  r"việc nhẹ lương cao|không cần kinh nghiệm.{0,20}thu nhập khủng", re.I)
+# Dòng có yêu cầu phân biệt thì bỏ khỏi tin.
+BIASED = re.compile(r"ngoại hình|giới tính|chiều cao|cân nặng|độ tuổi|^\W*(nam|nữ)\b", re.I)
+
+
+def list_ids(location_id):
+    """Mã tin trên trang đầu của một tỉnh, kèm link tin."""
+    resp = requests.get(f"{SITE}/viec-lam/tinh-l{location_id}-vi.html", headers=HEADERS, timeout=TIMEOUT)
+    resp.raise_for_status()
+    return {m.group(1): SITE + m.group(0) for m in JOB_LINK.finditer(resp.text)}
+
+
+def detail(job_id):
+    resp = requests.get(DETAIL, params={"job_id": job_id, "user_id": "", "my_job": 0}, headers=HEADERS, timeout=TIMEOUT)
+    resp.raise_for_status()
+    return resp.json().get("data") or {}
+
+
+def lines(raw):
+    """HTML mô tả thành danh sách dòng, bỏ dấu đầu dòng và dòng có yêu cầu phân biệt."""
+    text = re.sub(r"<\s*(br|/p|/li|/div|/h\d)[^>]*>", "\n", raw or "", flags=re.I)
+    text = html.unescape(re.sub(r"<[^>]+>", "", text))
+    out = []
+    for line in text.splitlines():
+        line = re.sub(r"^[\s\-–•·*+●○▪]+", "", line).strip()
+        if line and not BIASED.search(line):
+            out.append(line)
+    return out
+
+
+def money(d):
+    lo, hi = d.get("job_from_salary") or 0, d.get("job_to_salary") or 0
+    if d.get("job_salary_unit") != "vnd" or not (lo or hi):
+        return "Thỏa thuận"
+    fmt = lambda v: f"{v / 1e6:g}"
+    if lo and hi:
+        return f"{fmt(lo)} - {fmt(hi)} triệu"
+    return f"Từ {fmt(lo)} triệu" if lo else f"Đến {fmt(hi)} triệu"
+
+
+def experience(d):
+    lo, hi = d.get("job_experience") or 0, d.get("job_to_experience") or 0
+    if not d.get("job_is_experience") or not (lo or hi):
+        return "Chưa cập nhật"
+    return f"{lo} - {hi} năm" if lo and hi else f"Từ {lo or hi} năm"
+
+
+def to_job(d, link, location_id):
+    """Chuyển tin CareerViet sang dạng tin của timviecso; trả về (tin, lý do loại)."""
+    if not d.get("job_is_public", 1) or d.get("job_is_security"):
+        return None, "ẩn hoặc không công khai"
+    company = (d.get("emp_name") or d.get("job_contact_company") or "").strip()
+    if not company:
+        return None, "không có tên công ty"
+    deadline = (d.get("job_last_date") or "")[:10]
+    if not deadline or deadline < date.today().isoformat():
+        return None, "hết hạn"
+    body = " ".join([d.get("job_content") or "", d.get("job_require_skill") or "", d.get("job_benefit") or ""])
+    if SCAM.search(html.unescape(re.sub(r"<[^>]+>", " ", body))):
+        return None, "có dấu hiệu thu phí"
+    places = [w for w in d.get("job_workstation") or [] if w.get("location_id") == location_id] or d.get("job_workstation") or []
+    industries = d.get("industries") or []
+    job_type = d.get("job_type") or ""
+    description = lines(d.get("job_content")) + ["Ứng tuyển: nộp đơn trực tiếp tại link tin gốc. Không mất phí."]
+    return {
+        "title": d.get("job_title", "").strip(),
+        "originalTitle": d.get("job_title", "").strip(),
+        "location": "TP Cần Thơ" if location_id == CAN_THO else "Đồng bằng sông Cửu Long",
+        "employer": {"name": company, "logo": d.get("emp_logo") or "",
+                     "industry": industries[0]["industry_name_vn"] if industries else ""},
+        "salary": money(d),
+        "deadline": deadline,
+        "workType": "Bán thời gian" if job_type[1:2] == "1" and job_type[:1] != "1" else "Toàn thời gian",
+        "workingTime": (d.get("job_work_time") or "").strip() or "Chưa cập nhật",
+        "experience": experience(d),
+        "education": d.get("degree_name_vn") or "Chưa cập nhật",
+        "quantity": 1,
+        "address": "; ".join(w["emp_work_location"] for w in places[:2] if w.get("emp_work_location"))
+                   or d.get("location_name_vn") or "Chưa cập nhật",
+        "description": description,
+        "requirements": lines(d.get("job_require_skill")) or ["Chưa cập nhật"],
+        "benefits": [b["benefit_name_vn"] for b in d.get("benefits") or [] if b.get("benefit_name_vn")],
+        "source": link,
+    }, None
+
+
+def scan(max_posts, dry_run=False, max_checks=80):
+    posted = timviecso.list_jobs()
+    on_site = {m for j in posted for line in j.get("description") or [] for m in JOB_LINK.findall(line)}
+    found = {}  # mã tin -> (link, mã tỉnh)
+    for loc in [CAN_THO] + MEKONG:
+        try:
+            for job_id, link in list_ids(loc).items():
+                found.setdefault(job_id, (link, loc))
+        except requests.RequestException as exc:
+            print(f"Bỏ qua tỉnh {loc}: {exc}", file=sys.stderr)
+    # Mã tin CareerViet tăng dần theo thời gian đăng: mã lớn là tin mới.
+    fresh = sorted((i for i in found if i not in on_site), key=lambda i: int(i, 16), reverse=True)
+    jobs, skipped = [], []
+    for job_id in fresh[:max_checks]:
+        if len(jobs) >= max_posts:
+            break
+        link, loc = found[job_id]
+        try:
+            job, reason = to_job(detail(job_id), link, loc)
+        except (requests.RequestException, ValueError) as exc:
+            job, reason = None, f"lỗi đọc tin: {exc}"
+        if job:
+            jobs.append(job)
+        else:
+            skipped.append({"link": link, "ly_do": reason})
+    results = timviecso.post_jobs(jobs, dry_run=dry_run) if jobs else []
+    return {"tin_moi_chua_dang": len(fresh), "ket_qua": results, "bo_qua": skipped}
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--max", type=int, default=5, help="Số tin đăng tối đa mỗi lượt (mặc định 5)")
+    p.add_argument("--dry-run", action="store_true", help="Chỉ in tin sẽ đăng, không đăng")
+    args = p.parse_args(argv)
+    report = scan(args.max, dry_run=args.dry_run)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 1 if any(r["status"] == "loi" for r in report["ket_qua"]) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
