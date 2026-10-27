@@ -61,6 +61,7 @@ def spoken(text):
     text = re.sub(r",\s*([,.])", r"\1", text)
     text = re.sub(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", r"\1 tháng \2 năm \3", text)
     text = re.sub(r"\b(\d{1,2})/(\d{1,2})\b", r"\1 tháng \2", text)
+    text = re.sub(r"\b24\b", "hai mươi bốn", text)  # Vbee hay đọc "hai mươi tư"; Design24 đã có trong phat-am.json là "hai bốn"
     text = re.sub(r"\s+", " ", text).strip()
     # Viết hoa chữ đầu mỗi câu
     return re.sub(r"(^|[.!?]\s+)(\w)", lambda m: m.group(1) + m.group(2).upper(), text)
@@ -218,7 +219,7 @@ def pay_text(sal):
 
 def script(d):
     """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
-    mở đầu, bản đồ, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
+    mở đầu, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
     Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
     jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
     if d.get("grid"):
@@ -230,14 +231,6 @@ def script(d):
         f"Đì sai hai bốn xin chào! Bạn đang tìm việc ở Cần Thơ, miền Tây, hay Thành phố Hồ Chí Minh? "
         f"Hôm nay, có tới {total} việc làm mới. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
     )
-    # Bản đồ
-    parts = ["Cùng xem bản đồ việc làm nhé."]
-    for l in d["lists"]:
-        parts.append(f"{region_name(l['name'])}, có {count_word(len(l['jobs']))} vị trí.")
-    if d.get("grid"):
-        provs = [c["province"] for c in d["grid"]["cells"]]
-        parts.append("Miền Tây có thêm cơ hội ở " + ", ".join(provs[:-1]) + (", và " + provs[-1] if len(provs) > 1 else provs[0]) + ".")
-    lines.append(fit(parts, "", limit=260))
     # Ngành nghề
     counts = {}
     for j in jobs:
@@ -295,7 +288,7 @@ def script(d):
         "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
     )
     # Kết
-    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới lúc tám giờ sáng, và hai giờ chiều mỗi ngày nhé!")
+    lines.append("Việc làm mới được cập nhật liên tục. Theo dõi Đì sai hai bốn, để không bỏ lỡ nhé!")
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 

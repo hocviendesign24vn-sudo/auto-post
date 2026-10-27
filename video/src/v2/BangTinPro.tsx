@@ -10,7 +10,6 @@ import { C } from "../brand";
 import type { BangTinData } from "../types";
 import { Outro } from "../scenes/Outro";
 import { Hook } from "./Hook";
-import { MapScene } from "./MapScene";
 import { IndustryScene } from "./IndustryScene";
 import { SalaryScene } from "./SalaryScene";
 import { RegionScene } from "./RegionScene";
@@ -28,7 +27,6 @@ type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; s
 export const proScenes = (d: BangTinData): Scene[] => {
   const s: Scene[] = [
     { key: "hook", dur: 110, el: () => <Hook data={d} /> },
-    { key: "map", dur: 150, el: () => <MapScene data={d} /> },
     { key: "industry", dur: 140, el: () => <IndustryScene data={d} /> },
     { key: "salary", dur: 150, el: () => <SalaryScene data={d} /> },
     ...d.lists.map((l) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> })),
