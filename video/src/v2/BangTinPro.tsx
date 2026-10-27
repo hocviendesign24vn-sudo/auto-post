@@ -70,7 +70,7 @@ export const proTotalFrames = (d: BangTinData) => {
 
 // Clip ngắn hơn cảnh thì phát chậm lại (tối đa một nửa tốc độ), vẫn thiếu thì lặp
 const bgFor = (d: BangTinData, i: number, dur: number) => {
-  const b = d.broll?.[i];
+  const b = d.broll?.length ? d.broll[i % d.broll.length] : undefined;
   return b ? { src: b.src, rate: Math.max(0.5, Math.min(1, b.dur / (dur / FPS))) } : null;
 };
 

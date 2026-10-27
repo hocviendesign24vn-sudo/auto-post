@@ -1,5 +1,15 @@
 # Hướng dẫn cho routine
 
+## Routine bản tin video (7:00 mỗi sáng, từ 28/10/2026)
+
+Một video bản tin mỗi ngày, đăng 7:00 (giờ Việt Nam) lên Facebook, TikTok @timviecso.vn và YouTube qua Buffer (id kênh trong `channels.json`).
+
+1. Lấy khoảng 20 tin mới, còn hạn trên CareerViet (`autopost/careerviet.py`): ưu tiên Cần Thơ, rồi các tỉnh ĐBSCL (ô miền Tây, tối đa 4 tỉnh), rồi TP.HCM. Bỏ tin công ty ẩn danh, thu phí, sai khu vực. Ghi JSON bảng tin theo `examples/bangtin-mau.json`, mỗi tin có `id` CareerViet, `co` ghi đủ loại hình công ty.
+2. `render/video.sh <json> out/video.mp4 --voice`. Kiểm tra lời đọc bằng `python3 render/voice.py <json> --dry-run`: mở đầu "Xin chào bạn, đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. Dự án này được nghiên cứu và phát triển tại Học viện Design24. Hôm nay, ngày D, tháng M, năm Y, ..." (chỉ nói ngày, không nói giờ); không nhắc App Store; CH Play đọc "sê hắc lây". Video phải dài ít nhất 90 giây, có đủ TP.HCM. Xem vài khung hình trước khi đăng.
+3. Nén: bản chính `-crf 28 -maxrate 1.0M`; bản TikTok `-crf 30 -maxrate 0.7M` (khoảng 13 MB). Tải lên bằng `python3 -m autopost.media <file...> --folder <ngày>`.
+4. Đăng (hẹn `--at` 7:00 nếu còn kịp, không thì đăng ngay): Facebook dùng `--metadata '{"facebook":{"type":"post"}}'` (Reels chỉ nhận ≤90 giây); TikTok `--service tiktok --title`; YouTube `--service youtube --title "... #Shorts"`.
+5. Lưu bài vào `/mnt/project-files/auto-post/bai-<ngày>-0700/` nếu có thư mục đó; ghi dòng mới vào tab `Lich dang` của sheet "Lich dang" (id, link, trạng thái). Kênh lỗi: ghi lỗi, không đăng lại quá 2 lần.
+
 ## Routine soạn bài (20:00 mỗi tối)
 
 1. Đọc file quy tắc `00_Thuong hieu/Quy tac noi dung tuyen dung` trên Drive. Quy tắc trong file đó luôn được ưu tiên.
