@@ -1,58 +1,58 @@
 import React from "react";
-import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { C, FONT } from "../brand";
 import { BrandBackground, ease, TopBar, useSpring } from "../ui";
 import { Ico, Title } from "./kit";
 
-const STEPS = [
-  { icon: "search", t: "Chọn việc làm phù hợp", s: "Xem kỹ yêu cầu, mức lương, hạn nộp, địa điểm" },
-  { icon: "phone", t: "Liên hệ nhà tuyển dụng", s: "Ứng tuyển trực tiếp với công ty" },
-  { icon: "globe", t: "Nhanh hơn: timviecso.vn", s: "Hoặc tải app Tìm Việc Số trên CH Play, App Store" },
+const WAYS = [
+  { icon: "phone", k: "CÁCH 1", t: "Liên hệ trực tiếp nhà tuyển dụng", s: "Gọi điện, gửi hồ sơ theo thông tin trong tin tuyển dụng" },
+  { icon: "globe", k: "CÁCH 2 • NHANH HƠN", t: "timviecso.vn hoặc app Tìm Việc Số", s: "Trên CH Play và App Store" },
 ];
 
-const QRS = [
-  { src: "qr/website.png", label: "Website", value: "timviecso.vn" },
-  { src: "qr/chplay.png", label: "App trên CH Play", value: "Tìm Việc Số" },
-];
-
-// 3 bước ứng tuyển nối bằng đường kẻ, sau đó 2 mã QR (website, app CH Play).
+// Bước 1 chọn việc, sau đó 2 cách ứng tuyển độc lập (HOẶC), cuối cùng cảnh báo lừa đảo.
 export const StepsScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const qr = useSpring(52, 12, 160);
+  const pick = useSpring(10, 13, 150);
+  const or = useSpring(62, 9, 220);
   return (
     <AbsoluteFill style={{ fontFamily: FONT, color: "#fff" }}>
       <BrandBackground />
       <TopBar />
-      <Title kicker="Hướng dẫn" title="Ứng tuyển chỉ 3 bước" />
-      <div style={{ position: "absolute", top: 440, left: 70, right: 70 }}>
-        <div style={{ position: "absolute", left: 58, top: 60, width: 6, height: 400 * ease(frame, 10, 60, [0, 1]), background: `linear-gradient(${C.orange}, ${C.blue2})`, borderRadius: 6 }} />
-        {STEPS.map((s, i) => {
-          const d = 10 + i * 14;
+      <Title kicker="Hướng dẫn" title="Ứng tuyển thế nào?" />
+      <div style={{ position: "absolute", top: 440, left: 70, right: 70, display: "flex", alignItems: "center", gap: 30, background: "rgba(255,255,255,.12)", border: "2px solid rgba(255,255,255,.25)", borderRadius: 32, padding: "26px 30px", opacity: pick, translate: `0px ${(1 - pick) * 80}px` }}>
+        <div style={{ width: 120, height: 120, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
+          <Ico name="search" size={60} color={C.blue1} />
+        </div>
+        <div>
+          <div style={{ fontSize: 30, fontWeight: 800, color: C.orange }}>TRƯỚC HẾT</div>
+          <div style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1 }}>Chọn việc làm phù hợp</div>
+          <div style={{ fontSize: 30, opacity: 0.85, marginTop: 6 }}>Xem kỹ yêu cầu, mức lương, hạn nộp, địa điểm</div>
+        </div>
+      </div>
+      <div style={{ position: "absolute", top: 710, left: 0, right: 0, textAlign: "center", fontSize: 36, fontWeight: 800, opacity: ease(frame, 30, 40, [0, 1]) }}>
+        Rồi ứng tuyển theo <span style={{ color: C.orange }}>một trong hai cách</span>
+      </div>
+      <div style={{ position: "absolute", top: 790, left: 70, right: 70, display: "flex", gap: 96 }}>
+        {WAYS.map((w, i) => {
+          const d = 36 + i * 14;
           return (
-            <div key={i} style={{ position: "relative", display: "flex", alignItems: "center", gap: 30, height: 180, opacity: ease(frame, d, d + 10, [0, 1]), translate: `${ease(frame, d, d + 18, [80, 0])}px 0px` }}>
-              <div style={{ width: 122, height: 122, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 14px 34px rgba(0,0,0,.25)", flex: "none" }}>
-                <Ico name={s.icon} size={60} color={C.blue1} />
+            <div key={i} style={{ flex: 1, background: "#fff", color: C.ink, borderRadius: 30, padding: "30px 26px", boxShadow: "0 20px 50px rgba(0,0,0,.3)", opacity: ease(frame, d, d + 10, [0, 1]), translate: `${ease(frame, d, d + 18, [i ? 200 : -200, 0])}px 0px` }}>
+              <div style={{ width: 96, height: 96, borderRadius: "50%", background: i ? C.orange : C.blue1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Ico name={w.icon} size={50} />
               </div>
-              <div>
-                <div style={{ fontSize: 30, fontWeight: 800, color: C.orange }}>BƯỚC {i + 1}</div>
-                <div style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1 }}>{s.t}</div>
-                <div style={{ fontSize: 30, opacity: 0.85, marginTop: 6 }}>{s.s}</div>
-              </div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: i ? C.orange : C.blue1, marginTop: 18 }}>{w.k}</div>
+              <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.15, marginTop: 4 }}>{w.t}</div>
+              <div style={{ fontSize: 27, color: C.muted, marginTop: 10, lineHeight: 1.3 }}>{w.s}</div>
             </div>
           );
         })}
+        <div style={{ position: "absolute", left: "50%", top: 40, translate: "-50% 0", scale: String(or), width: 88, height: 88, borderRadius: "50%", background: C.orange, border: "5px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 900, boxShadow: "0 10px 30px rgba(0,0,0,.35)" }}>
+          HOẶC
+        </div>
       </div>
-      <div style={{ position: "absolute", top: 1050, left: 70, right: 70, display: "flex", justifyContent: "center", gap: 50 }}>
-        {QRS.map((q, i) => (
-          <div key={q.src} style={{ width: 400, background: "#fff", color: C.ink, borderRadius: 30, padding: "26px 26px 20px", textAlign: "center", boxShadow: "0 20px 50px rgba(0,0,0,.3)", opacity: qr, scale: String(0.8 + 0.2 * qr), translate: `0px ${(1 - qr) * (60 + i * 30)}px` }}>
-            <Img src={staticFile(q.src)} style={{ width: 300, height: 300, imageRendering: "pixelated" }} />
-            <div style={{ fontSize: 28, fontWeight: 700, color: C.blue1, marginTop: 10 }}>{q.label}</div>
-            <div style={{ fontSize: 38, fontWeight: 900 }}>{q.value}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ position: "absolute", top: 1500, left: 0, right: 0, textAlign: "center", fontSize: 34, fontWeight: 800, opacity: ease(frame, 70, 80, [0, 1]) }}>
-        Quét mã để tìm việc nhanh hơn
+      <div style={{ position: "absolute", top: 1330, left: 70, right: 70, display: "flex", alignItems: "center", gap: 24, background: "rgba(229,57,53,.92)", borderRadius: 26, padding: "20px 28px", opacity: ease(frame, 80, 92, [0, 1]) }}>
+        <Ico name="alert" size={64} />
+        <div style={{ fontSize: 32, fontWeight: 700, lineHeight: 1.25 }}>Không nộp phí, không đặt cọc, không chuyển khoản để được nhận việc.</div>
       </div>
     </AbsoluteFill>
   );
