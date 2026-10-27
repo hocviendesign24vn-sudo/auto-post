@@ -63,7 +63,7 @@ export const Intro: React.FC<{ data: BangTinData }> = ({ data }) => {
       </div>
 
       <div style={{ position: "absolute", bottom: 200, left: 0, right: 0, textAlign: "center", fontSize: 38, fontWeight: 600, opacity: ease(frame, 60, 75, [0, 0.9]) }}>
-        Cập nhật mỗi ngày lúc 8:00 và 14:00
+        Cập nhật mỗi ngày
       </div>
     </AbsoluteFill>
   );

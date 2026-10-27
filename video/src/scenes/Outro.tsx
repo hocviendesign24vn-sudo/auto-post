@@ -64,7 +64,7 @@ export const Outro: React.FC<{ data: BangTinData }> = ({ data }) => {
         </div>
       </div>
       <div style={{ position: "absolute", bottom: 80, left: 0, right: 0, textAlign: "center", fontSize: 30, fontWeight: 600, opacity: ease(frame, 76, 90, [0, 0.85]) }}>
-        {CONTACT.home} • Việc mới mỗi ngày 8:00 và 14:00
+        {CONTACT.home} • Việc mới mỗi ngày
       </div>
     </AbsoluteFill>
   );

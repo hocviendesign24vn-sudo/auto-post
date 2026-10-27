@@ -46,11 +46,11 @@ export const salaryMax = (sal: string): number | null => {
 export type Industry = { key: string; label: string; icon: string; color: string };
 export const INDUSTRIES: (Industry & { re: RegExp })[] = [
   { key: "ketoan", label: "Kế toán, tài chính", icon: "calculator", color: "#0B86E8", re: /kế toán|tài chính|kiểm soát|thu hồi nợ|accountant/i },
-  { key: "xaydung", label: "Xây dựng, kỹ thuật", icon: "hardhat", color: "#FF7F14", re: /xây dựng|thi công|chỉ huy|kỹ sư|giám sát|hiện trường|qs|mep|cơ điện|kỹ thuật|bảo trì|điện lạnh/i },
-  { key: "kinhdoanh", label: "Kinh doanh, bán hàng", icon: "trending", color: "#2E8B3E", re: /kinh doanh|sales|bán hàng|thị trường|khách hàng|merchandiser|qhkh/i },
+  { key: "xaydung", label: "Xây dựng, kỹ thuật", icon: "hardhat", color: "#FF7F14", re: /xây dựng|thi công|chỉ huy|kỹ sư|giám sát|hiện trường|qs|mep|cơ điện|kỹ thuật|bảo trì|điện lạnh|hse/i },
+  { key: "kinhdoanh", label: "Kinh doanh, bán hàng", icon: "trending", color: "#2E8B3E", re: /kinh doanh|sales|bán hàng|thị trường|khách hàng|merchandiser|qhkh|marketing|cửa hàng/i },
   { key: "sanxuat", label: "Sản xuất, chất lượng", icon: "factory", color: "#8E24AA", re: /sản xuất|đúc|luyện|quality|chất lượng|xưởng|r&d/i },
   { key: "nganhang", label: "Ngân hàng, bảo hiểm", icon: "landmark", color: "#0813DF", re: /giao dịch viên|ngân hàng|bảo hiểm|giám định/i },
-  { key: "khac", label: "Vận tải, dịch vụ khác", icon: "truck", color: "#E53935", re: /lái xe|tài xế|driver|giao hàng|.*/i },
+  { key: "khac", label: "Dịch vụ, ngành khác", icon: "sparkles", color: "#E53935", re: /lái xe|tài xế|driver|giao hàng|.*/i },
 ];
 
 export const industryOf = (j: Job): Industry => {
@@ -76,7 +76,8 @@ export const industryCounts = (d: BangTinData) => {
     const ind = industryOf(j);
     m.set(ind.key, { ind, count: (m.get(ind.key)?.count ?? 0) + 1 });
   }
-  return [...m.values()].sort((a, b) => b.count - a.count);
+  // Bằng số tin thì "ngành khác" xếp sau
+  return [...m.values()].sort((a, b) => b.count - a.count || Number(a.ind.key === "khac") - Number(b.ind.key === "khac"));
 };
 
 export const topSalaries = (d: BangTinData, n = 5) =>

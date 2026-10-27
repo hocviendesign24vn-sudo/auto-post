@@ -177,15 +177,15 @@ def script_basic(d):
 
 
 INDUSTRY = [  # giống video/src/derive.ts
-    ("xây dựng, kỹ thuật", r"xây dựng|thi công|chỉ huy|kỹ sư|giám sát|hiện trường|qs|mep|cơ điện|kỹ thuật|bảo trì|điện lạnh"),
+    ("xây dựng, kỹ thuật", r"xây dựng|thi công|chỉ huy|kỹ sư|giám sát|hiện trường|qs|mep|cơ điện|kỹ thuật|bảo trì|điện lạnh|hse"),
     ("kế toán, tài chính", r"kế toán|tài chính|kiểm soát|thu hồi nợ|accountant"),
-    ("kinh doanh, bán hàng", r"kinh doanh|sales|bán hàng|thị trường|khách hàng|merchandiser|qhkh"),
+    ("kinh doanh, bán hàng", r"kinh doanh|sales|bán hàng|thị trường|khách hàng|merchandiser|qhkh|marketing|cửa hàng"),
     ("sản xuất, chất lượng", r"sản xuất|đúc|luyện|quality|chất lượng|xưởng|r&d"),
     ("ngân hàng, bảo hiểm", r"giao dịch viên|ngân hàng|bảo hiểm|giám định"),
-    ("vận tải, dịch vụ", r".*"),
+    ("dịch vụ, ngành khác", r".*"),
 ]
 # Thứ tự trong derive.ts quyết định ngành; ở đây dò theo đúng thứ tự đó
-INDUSTRY_ORDER = ["kế toán, tài chính", "xây dựng, kỹ thuật", "kinh doanh, bán hàng", "sản xuất, chất lượng", "ngân hàng, bảo hiểm", "vận tải, dịch vụ"]
+INDUSTRY_ORDER = ["kế toán, tài chính", "xây dựng, kỹ thuật", "kinh doanh, bán hàng", "sản xuất, chất lượng", "ngân hàng, bảo hiểm", "dịch vụ, ngành khác"]
 NUM_WORDS = "không một hai ba bốn năm sáu bảy tám chín mười".split()
 
 
@@ -243,7 +243,7 @@ def script(d):
     for j in jobs:
         k = industry(j["pos"])
         counts[k] = counts.get(k, 0) + 1
-    ranked = sorted(counts.items(), key=lambda x: -x[1])
+    ranked = sorted(counts.items(), key=lambda x: (-x[1], x[0] == INDUSTRY_ORDER[-1]))  # bằng số tin thì "ngành khác" xếp sau
     s = f"Ngành tuyển nhiều nhất hôm nay, là {ranked[0][0]}, với {count_word(ranked[0][1])} vị trí."
     if len(ranked) > 1:
         s += f" Tiếp theo là {ranked[1][0]}, với {count_word(ranked[1][1])} vị trí."
@@ -295,7 +295,7 @@ def script(d):
         "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
     )
     # Kết
-    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới lúc tám giờ sáng, và hai giờ chiều mỗi ngày nhé!")
+    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới mỗi ngày nhé!")
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 

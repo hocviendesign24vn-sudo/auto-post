@@ -1,0 +1,43 @@
+{
+  "date": "26/10/2026",
+  "regionsLine": ["Cần Thơ", "Đồng bằng sông Cửu Long", "TP. Hồ Chí Minh"],
+  "stats": [
+    {"icon": "briefcase", "value": "20", "label": "vị trí\ntuyển dụng"},
+    {"icon": "pin", "value": "6", "label": "khu vực\ncó việc"},
+    {"icon": "calendar", "value": "31/12", "label": "hạn nộp\nmuộn nhất"}
+  ],
+  "lists": [
+    {"name": "TP. HỒ CHÍ MINH", "sub": "Việc mới tối nay", "theme": "orange", "jobs": [
+      {"pos": "TP kinh doanh & marketing", "co": "Công nghệ Môi trường Envico", "sal": "35–40 triệu", "dl": "25/11"},
+      {"pos": "CV phát triển năng lực", "co": "Trang sức PNJ", "sal": "23–28 triệu", "dl": "26/11"},
+      {"pos": "CV marketing tổng hợp", "co": "Mỹ phẩm Celeb Beauty", "sal": "18–22 triệu", "dl": "25/11"},
+      {"pos": "Kỹ sư thiết kế M&E/HVAC", "co": "SAGOMED", "sal": "15–25 triệu", "dl": "26/11"},
+      {"pos": "Chuyên viên dự toán (QS)", "co": "Phê La", "sal": "15–20 triệu", "dl": "26/11"},
+      {"pos": "NV thiết kế (Designer)", "co": "Mỹ phẩm Celeb Beauty", "sal": "12–16 triệu", "dl": "25/11"}
+    ]},
+    {"name": "CẦN THƠ", "sub": "Việc làm đang nhận hồ sơ", "theme": "blue", "jobs": [
+      {"pos": "KTV thiết bị luyện", "co": "Thép Tây Đô", "sal": "20–25 triệu", "dl": "20/11"},
+      {"pos": "NV kinh doanh Miền Tây", "co": "Yakult Việt Nam", "sal": "11–20 triệu", "dl": "30/11"},
+      {"pos": "CV tư vấn đầu tư cá nhân", "co": "Chứng khoán Rồng Việt", "sal": "7–15 triệu", "dl": "30/11"},
+      {"pos": "CV phát triển thị trường", "co": "Tập đoàn KIDO", "sal": "Thỏa thuận", "dl": "01/12"},
+      {"pos": "QL kinh doanh khu vực", "co": "Mămmy Việt Nam", "sal": "Thỏa thuận", "dl": "24/11"},
+      {"pos": "NV kinh doanh Miền Tây", "co": "BESTMIX", "sal": "Thỏa thuận", "dl": "20/11"}
+    ]}
+  ],
+  "grid": {"name": "ĐỒNG BẰNG SÔNG CỬU LONG", "sub": "Cơ hội nổi bật", "cells": [
+    {"province": "Tiền Giang", "color": "#E53935", "jobs": [
+      {"pos": "Nhân viên HSE", "co": "Tập đoàn Đèo Cả", "sal": "16–30 triệu"},
+      {"pos": "NV kế toán dự án", "co": "Tập đoàn Đèo Cả", "sal": "14–25 triệu"}]},
+    {"province": "Bến Tre", "color": "#1E63D6", "jobs": [
+      {"pos": "Cửa hàng trưởng", "co": "TM Huỳnh Thành", "sal": "15–30 triệu"},
+      {"pos": "Sales Supervisor", "co": "URC Việt Nam", "sal": "12–15 triệu"}]},
+    {"province": "An Giang", "color": "#2E7D32", "jobs": [
+      {"pos": "KS giám sát MEP (Phú Quốc)", "co": "T.T.S.C", "sal": "20–25 triệu"},
+      {"pos": "CV kế toán tổng hợp", "co": "Tập đoàn Lộc Trời", "sal": "Thỏa thuận"}]},
+    {"province": "Hậu Giang", "color": "#8E24AA", "jobs": [
+      {"pos": "Trợ lý phiên dịch tiếng Nhật", "co": "Dược Hậu Giang", "sal": "13–18 triệu"},
+      {"pos": "CV khách hàng cá nhân", "co": "Sacombank", "sal": "10–15 triệu"}]}
+  ]},
+  "notes": ["Tin còn hạn nộp tại ngày 26/10/2026", "Nhà tuyển dụng thật không thu phí ứng viên", "Nguồn tổng hợp: CareerViet"],
+  "cta": "Inbox để nhận danh sách chi tiết và link ứng tuyển"
+}
