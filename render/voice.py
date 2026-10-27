@@ -224,7 +224,7 @@ def pay_text(sal):
 
 def script(d):
     """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
-    mở đầu, nhà tuyển dụng, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
+    mở đầu, nhà tuyển dụng, ngành nghề, top lương, Cần Thơ, miền Tây, khu vực khác, sắp hết hạn, cách ứng tuyển, mã QR, kết.
     Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
     jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
     if d.get("grid"):
@@ -234,7 +234,7 @@ def script(d):
     dd, mm, yy = (int(x) for x in d["date"].split("/"))
     lines = []
     lines.append(
-        "Xin chào bạn đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. "
+        "Xin chào bạn, đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. "
         "Dự án này được nghiên cứu và phát triển tại Học viện Design24. "
         f"Hôm nay, vào lúc 7 giờ sáng, ngày {dd}, tháng {mm}, năm {yy}, chúng tôi cập nhật bản tin việc làm, "
         f"gồm có {total} vị trí. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
@@ -312,11 +312,28 @@ def script(d):
     for l in d["lists"]:
         if l not in can_tho:
             lines.append(region_line(l))
-    # 3 bước + chống lừa đảo
+    # Sắp hết hạn nộp (giống soonJobs trong DeadlineScene.tsx)
+    def dl_key(j):
+        dd_, mm_ = (int(x) for x in j["dl"].split("/")[:2])
+        return mm_ * 100 + dd_
+    soon = sorted([j for j in jobs if j.get("dl")], key=dl_key)[:4]
+    if soon:
+        parts = ["Đừng bỏ lỡ những vị trí sắp hết hạn nộp!"]
+        for j in soon:
+            pos, co = readable(j["pos"]), readable(re.sub(r"\s*\(.*?\)", "", j["co"]))
+            if pos:
+                parts.append(f"Ngày {j['dl']}, {co + ' tuyển ' + lower_first(pos) if co else lower_first(pos)}.")
+        lines.append(fit(parts, "", limit=280))
+    # Cách ứng tuyển: chọn việc, rồi một trong hai cách (độc lập, không phải các bước nối tiếp)
     lines.append(
-        "Ứng tuyển chỉ với ba bước. Một, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
-        "Hai, liên hệ trực tiếp với nhà tuyển dụng. Ba, nhanh hơn, hãy vào tìm việc số chấm vê en, "
-        "hoặc tải ứng dụng Tìm Việc Số trên CH Play và App Store. Lưu ý! Không nộp phí, không đặt cọc."
+        "Ứng tuyển thế nào? Trước hết, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
+        "Sau đó, liên hệ trực tiếp với nhà tuyển dụng. Hoặc nhanh hơn, truy cập timviecso.vn, "
+        "hoặc tải ứng dụng Tìm Việc Số trên CH Play và App Store."
+    )
+    # 2 mã QR (QRScene.tsx: trên là app CH Play, dưới là website)
+    lines.append(
+        "Quét mã phía trên để tải ứng dụng Tìm Việc Số trên CH Play. "
+        "Hoặc quét mã phía dưới để truy cập website timviecso.vn, xem đầy đủ tin tuyển dụng và ứng tuyển nhanh hơn."
     )
     # Kết
     lines.append("Việc làm mới được cập nhật liên tục. Theo dõi Đì sai hai bốn, để không bỏ lỡ nhé!")
