@@ -49,12 +49,17 @@ ABBR = [  # viết tắt trên ảnh -> cách đọc
     (r"&", "và"),
     (r"\s*\(([^)]*)\)", r", \1,"),
     (r"\bĐBSCL\b", "Đồng bằng sông Cửu Long"),
+    (r"\bTNHH\b", "trách nhiệm hữu hạn"),
+    (r"\bTMCP\b", "thương mại cổ phần"),
+    (r"\bMTV\b", "một thành viên"),
+    (r"\bCông ty CP\b", "Công ty cổ phần"),
 ]
 
 DIGITS = "không một hai ba bốn năm sáu bảy tám chín".split()
 
 
 def spoken(text):
+    text = text.replace("24/7", "hai bốn trên bảy")
     for pat, rep in ABBR:
         text = re.sub(pat, rep, text)
     text = re.sub(r"(\d+)\s*[–-]\s*(\d+)", r"\1 đến \2", text)
@@ -226,10 +231,13 @@ def script(d):
         jobs += [dict(j, region=c["province"]) for c in d["grid"]["cells"] for j in c["jobs"]]
     total = len(jobs)
     top = max((sal_max(j["sal"]) or 0) for j in jobs)
+    dd, mm, yy = (int(x) for x in d["date"].split("/"))
     lines = []
     lines.append(
-        f"Đì sai hai bốn xin chào! Bạn đang tìm việc ở Cần Thơ, miền Tây, hay Thành phố Hồ Chí Minh? "
-        f"Hôm nay, có tới {total} việc làm mới. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
+        "Xin chào bạn đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. "
+        "Dự án này được nghiên cứu và phát triển tại Học viện Design24. "
+        f"Hôm nay, vào lúc 7 giờ sáng, ngày {dd}, tháng {mm}, năm {yy}, chúng tôi cập nhật bản tin việc làm, "
+        f"gồm có {total} vị trí. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
     )
     # Nhà tuyển dụng (tường logo) và số vị trí theo khu vực
     cos = []
@@ -240,9 +248,11 @@ def script(d):
     parts = []
     if cos:
         parts.append("Nhà tuyển dụng hôm nay có " + ", ".join(cos[:3]) + (", và nhiều đơn vị khác." if len(cos) > 3 else "."))
-    counts = [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in d["lists"]]
+    ct = [l for l in d["lists"] if "cần thơ" in l["name"].lower()]
+    counts = [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in ct]
     if d.get("grid"):
         counts.append(f"miền Tây có {count_word(sum(len(c['jobs']) for c in d['grid']['cells']))} vị trí")
+    counts += [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in d["lists"] if l not in ct]
     parts.append(", ".join(counts) + ".")
     lines.append(fit(parts, "", limit=260))
     # Ngành nghề
@@ -268,8 +278,7 @@ def script(d):
         lines.append(s)
     else:
         lines.append("Và đây, là những vị trí có mức lương hấp dẫn nhất hôm nay!")
-    # Từng khu vực
-    for l in d["lists"]:
+    def region_line(l):
         ranked_jobs = sorted(l["jobs"], key=lambda j: -(sal_max(j["sal"]) or 0))
         star = next((j for j in ranked_jobs if readable(j["pos"])), None)
         others = [readable(j["pos"]) for j in l["jobs"] if j is not star]
@@ -284,7 +293,11 @@ def script(d):
         tail = f"Ngoài ra, còn {count_word(len(l['jobs']) - 1)} vị trí khác"
         if others:
             tail += ", như " + lower_first(others[0])
-        lines.append(fit([s], tail + ".", limit=280))
+        return fit([s], tail + ".", limit=280)
+    # Thứ tự khu vực giống video: Cần Thơ, miền Tây, rồi TP.HCM
+    can_tho = [l for l in d["lists"] if "cần thơ" in l["name"].lower()]
+    for l in can_tho:
+        lines.append(region_line(l))
     # Miền Tây
     if d.get("grid") and d["grid"]["cells"]:
         parts = ["Về miền Tây."]
@@ -296,10 +309,14 @@ def script(d):
             extra = f", lương tới {int(m)} triệu" if m and n == 0 else ""
             parts.append(f"{c['province']}, đang cần {lower_first(readable(j['pos']))}{extra}.")
         lines.append(fit(parts, "", limit=260))
+    for l in d["lists"]:
+        if l not in can_tho:
+            lines.append(region_line(l))
     # 3 bước + chống lừa đảo
     lines.append(
-        "Ứng tuyển chỉ với ba bước. Một, chọn việc phù hợp. Hai, nhắn Da lô, hoặc phan pết Đì sai hai bốn. "
-        "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
+        "Ứng tuyển chỉ với ba bước. Một, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
+        "Hai, liên hệ trực tiếp với nhà tuyển dụng. Ba, nhanh hơn, hãy vào tìm việc số chấm vê en, "
+        "hoặc tải ứng dụng Tìm Việc Số trên CH Play và App Store. Lưu ý! Không nộp phí, không đặt cọc."
     )
     # Kết
     lines.append("Việc làm mới được cập nhật liên tục. Theo dõi Đì sai hai bốn, để không bỏ lỡ nhé!")

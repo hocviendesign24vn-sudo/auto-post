@@ -28,7 +28,9 @@ export const CompaniesScene: React.FC<{ data: BangTinData }> = ({ data }) => {
     .slice(0, 12);
   const regions = regionCounts(data);
   const west = regions.slice(data.lists.length).reduce((a, r) => a + r.count, 0);
-  const chips = [...data.lists.map((l) => ({ name: shortRegion(l.name), count: l.jobs.length })), ...(west ? [{ name: "Miền Tây", count: west }] : [])];
+  const chip = (l: { name: string; jobs: unknown[] }) => ({ name: shortRegion(l.name), count: l.jobs.length });
+  const ct = data.lists.filter((l) => /cần thơ/i.test(l.name));
+  const chips = [...ct.map(chip), ...(west ? [{ name: "Miền Tây", count: west }] : []), ...data.lists.filter((l) => !ct.includes(l)).map(chip)];
   return (
     <AbsoluteFill style={{ fontFamily: FONT, color: "#fff" }}>
       <BrandBackground />

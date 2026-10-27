@@ -1,13 +1,13 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { C, CONTACT, FONT } from "../brand";
+import { C, FONT } from "../brand";
 import { BrandBackground, ease, TopBar, useSpring } from "../ui";
 import { Ico, Title } from "./kit";
 
 const STEPS = [
-  { icon: "search", t: "Chọn việc phù hợp", s: "Xem kỹ mức lương, hạn nộp, địa điểm" },
-  { icon: "chat", t: "Nhắn Zalo hoặc Fanpage", s: `Zalo ${CONTACT.zalo} • Học Viện Design24` },
-  { icon: "send", t: "Nhận link và nộp hồ sơ", s: "Ứng tuyển trực tiếp với nhà tuyển dụng" },
+  { icon: "search", t: "Chọn việc làm phù hợp", s: "Xem kỹ yêu cầu, mức lương, hạn nộp, địa điểm" },
+  { icon: "phone", t: "Liên hệ nhà tuyển dụng", s: "Ứng tuyển trực tiếp với công ty" },
+  { icon: "globe", t: "Nhanh hơn: timviecso.vn", s: "Hoặc tải app Tìm Việc Số trên CH Play, App Store" },
 ];
 
 // 3 bước ứng tuyển nối bằng đường kẻ, sau đó con dấu "không thu phí".

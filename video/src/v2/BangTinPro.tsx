@@ -8,7 +8,7 @@ import { wipe } from "@remotion/transitions/wipe";
 import { fade } from "@remotion/transitions/fade";
 import { C } from "../brand";
 import { BgVideoContext } from "../ui";
-import type { BangTinData } from "../types";
+import type { BangTinData, JobList } from "../types";
 import { Outro } from "../scenes/Outro";
 import { Hook } from "./Hook";
 import { CompaniesScene } from "./CompaniesScene";
@@ -23,6 +23,8 @@ export const FPS = 30;
 const T = 18;
 const VOICE_DELAY = 8;
 
+const isCanTho = (l: JobList) => /cần thơ/i.test(l.name);
+
 type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; subs?: boolean };
 
 // Thứ tự cảnh phải khớp với thứ tự lời đọc trong render/voice.py (script_pro)
@@ -32,9 +34,12 @@ export const proScenes = (d: BangTinData): Scene[] => {
     { key: "companies", dur: 150, el: () => <CompaniesScene data={d} /> },
     { key: "industry", dur: 140, el: () => <IndustryScene data={d} /> },
     { key: "salary", dur: 150, el: () => <SalaryScene data={d} /> },
-    ...d.lists.map((l) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> })),
   ];
+  // Thứ tự khu vực: Cần Thơ, các tỉnh ĐBSCL, rồi các khu vực còn lại (TP.HCM)
+  const region = (l: JobList) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> });
+  d.lists.filter(isCanTho).forEach((l) => s.push(region(l)));
   if (d.grid?.cells.length) s.push({ key: "west", dur: 160, el: () => <WestScene grid={d.grid!} /> });
+  d.lists.filter((l) => !isCanTho(l)).forEach((l) => s.push(region(l)));
   s.push({ key: "steps", dur: 150, el: () => <StepsScene /> });
   s.push({ key: "outro", dur: 170, el: () => <Outro data={d} />, subs: false });
   return s.map((x, i) => {
