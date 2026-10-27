@@ -6,7 +6,7 @@ import { Ico, Title } from "./kit";
 
 const WAYS = [
   { icon: "phone", k: "CÁCH 1", t: "Liên hệ trực tiếp nhà tuyển dụng", s: "Gọi điện, gửi hồ sơ theo thông tin trong tin tuyển dụng" },
-  { icon: "globe", k: "CÁCH 2 • NHANH HƠN", t: "timviecso.vn hoặc app Tìm Việc Số", s: "Trên CH Play và App Store" },
+  { icon: "globe", k: "CÁCH 2 • NHANH HƠN", t: "timviecso.vn hoặc app Tìm Việc Số", s: "Tải trên CH Play" },
 ];
 
 // Bước 1 chọn việc, sau đó 2 cách ứng tuyển độc lập (HOẶC), cuối cùng cảnh báo lừa đảo.

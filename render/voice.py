@@ -328,7 +328,7 @@ def script(d):
     lines.append(
         "Ứng tuyển thế nào? Trước hết, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
         "Sau đó, liên hệ trực tiếp với nhà tuyển dụng. Hoặc nhanh hơn, truy cập timviecso.vn, "
-        "hoặc tải ứng dụng Tìm Việc Số trên CH Play và App Store."
+        "hoặc tải ứng dụng Tìm Việc Số trên CH Play."
     )
     # 2 mã QR (QRScene.tsx: trên là app CH Play, dưới là website)
     lines.append(
