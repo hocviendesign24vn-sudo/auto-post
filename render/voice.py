@@ -295,7 +295,7 @@ def script(d):
         "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
     )
     # Kết
-    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới lúc tám giờ sáng, và hai giờ chiều mỗi ngày nhé!")
+    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới mỗi ngày nhé!")
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 

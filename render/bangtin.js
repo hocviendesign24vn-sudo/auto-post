@@ -178,7 +178,7 @@ const vOutro = () => vFrame(`<div style="flex:1;background:linear-gradient(160de
   <div style="background:#fff;border-radius:36px;padding:36px 44px"><img src="${logo}" style="width:300px;display:block"></div>
   <div style="margin-top:70px;font-size:68px;font-weight:900;line-height:1.15">Ứng tuyển<br><span style="color:${C.orange}">thế nào?</span></div>
   <div style="margin-top:40px;font-size:40px;font-weight:700;line-height:1.4">${esc(d.cta)}</div>
-  <div style="margin-top:60px;font-size:34px;font-weight:600;opacity:.9;line-height:1.4">Việc mới mỗi ngày lúc 8:00 và 14:00</div>
+  <div style="margin-top:60px;font-size:34px;font-weight:600;opacity:.9;line-height:1.4">Việc mới mỗi ngày</div>
   <div style="margin-top:50px;font-size:34px;font-weight:800;color:${C.orange};line-height:1.4">Nhà tuyển dụng thật<br>không bao giờ thu phí ứng viên</div>
 </div>`);
 
