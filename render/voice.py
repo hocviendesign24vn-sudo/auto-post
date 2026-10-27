@@ -219,7 +219,7 @@ def pay_text(sal):
 
 def script(d):
     """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
-    mở đầu, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
+    mở đầu, nhà tuyển dụng, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
     Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
     jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
     if d.get("grid"):
@@ -231,6 +231,20 @@ def script(d):
         f"Đì sai hai bốn xin chào! Bạn đang tìm việc ở Cần Thơ, miền Tây, hay Thành phố Hồ Chí Minh? "
         f"Hôm nay, có tới {total} việc làm mới. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
     )
+    # Nhà tuyển dụng (tường logo) và số vị trí theo khu vực
+    cos = []
+    for j in jobs:
+        co = readable(re.sub(r"\s*\(.*?\)", "", j["co"]))
+        if co and co not in cos:
+            cos.append(co)
+    parts = []
+    if cos:
+        parts.append("Nhà tuyển dụng hôm nay có " + ", ".join(cos[:3]) + (", và nhiều đơn vị khác." if len(cos) > 3 else "."))
+    counts = [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in d["lists"]]
+    if d.get("grid"):
+        counts.append(f"miền Tây có {count_word(sum(len(c['jobs']) for c in d['grid']['cells']))} vị trí")
+    parts.append(", ".join(counts) + ".")
+    lines.append(fit(parts, "", limit=260))
     # Ngành nghề
     counts = {}
     for j in jobs:

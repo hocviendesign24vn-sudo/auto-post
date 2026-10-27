@@ -7,9 +7,11 @@ import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import { fade } from "@remotion/transitions/fade";
 import { C } from "../brand";
+import { BgVideoContext } from "../ui";
 import type { BangTinData } from "../types";
 import { Outro } from "../scenes/Outro";
 import { Hook } from "./Hook";
+import { CompaniesScene } from "./CompaniesScene";
 import { IndustryScene } from "./IndustryScene";
 import { SalaryScene } from "./SalaryScene";
 import { RegionScene } from "./RegionScene";
@@ -27,6 +29,7 @@ type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; s
 export const proScenes = (d: BangTinData): Scene[] => {
   const s: Scene[] = [
     { key: "hook", dur: 110, el: () => <Hook data={d} /> },
+    { key: "companies", dur: 150, el: () => <CompaniesScene data={d} /> },
     { key: "industry", dur: 140, el: () => <IndustryScene data={d} /> },
     { key: "salary", dur: 150, el: () => <SalaryScene data={d} /> },
     ...d.lists.map((l) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> })),
@@ -56,6 +59,12 @@ export const proTotalFrames = (d: BangTinData) => {
   return s.reduce((a, x) => a + x.dur, 0) - (s.length - 1) * T;
 };
 
+// Clip ngắn hơn cảnh thì phát chậm lại (tối đa một nửa tốc độ), vẫn thiếu thì lặp
+const bgFor = (d: BangTinData, i: number, dur: number) => {
+  const b = d.broll?.[i];
+  return b ? { src: b.src, rate: Math.max(0.5, Math.min(1, b.dur / (dur / FPS))) } : null;
+};
+
 export const BangTinPro: React.FC<BangTinData> = (data) => {
   const { durationInFrames } = useVideoConfig();
   const frame = useCurrentFrame();
@@ -81,7 +90,7 @@ export const BangTinPro: React.FC<BangTinData> = (data) => {
               />
             )}
             <TransitionSeries.Sequence name={x.key} durationInFrames={x.dur}>
-              {x.el(x.dur)}
+              <BgVideoContext.Provider value={bgFor(data, i, x.dur)}>{x.el(x.dur)}</BgVideoContext.Provider>
             </TransitionSeries.Sequence>
           </React.Fragment>
         ))}

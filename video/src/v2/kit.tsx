@@ -1,5 +1,5 @@
 import React from "react";
-import { interpolate, useCurrentFrame } from "remotion";
+import { Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import {
   BadgeDollarSign, Briefcase, Building2, Calculator, CalendarClock, Factory, Globe, HardHat, Landmark, Mail,
   MapPin, MessageCircle, Phone, Search, Send, ShieldAlert, ShieldCheck, Sparkles, TrendingUp, Truck, Ban,
@@ -57,3 +57,17 @@ export const countText = (target: number, p: number, decimals = 0) => (target * 
 
 export const clampI = (f: number, a: number, b: number, x: number, y: number) =>
   interpolate(f, [a, b], [x, y], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+export const mediaSrc = (src: string) => (/^https?:/.test(src) ? src : staticFile(src));
+
+// Logo nhà tuyển dụng trong ô trắng bo góc; không có logo thì dùng biểu tượng ngành
+export const CoLogo: React.FC<{ src?: string; size: number; icon: string; color: string }> = ({ src, size, icon, color }) =>
+  src ? (
+    <div style={{ width: size, height: size, borderRadius: size * 0.22, background: "#fff", border: "2px solid #E6E9F2", display: "flex", alignItems: "center", justifyContent: "center", padding: size * 0.1, boxSizing: "border-box", flex: "none", overflow: "hidden" }}>
+      <Img src={mediaSrc(src)} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+    </div>
+  ) : (
+    <div style={{ width: size, height: size, borderRadius: size * 0.28, background: color, display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
+      <Ico name={icon} size={size * 0.56} />
+    </div>
+  );

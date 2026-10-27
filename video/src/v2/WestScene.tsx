@@ -4,7 +4,7 @@ import { C, FONT } from "../brand";
 import type { Cell } from "../types";
 import { industryOf } from "../derive";
 import { BrandBackground, ease, TopBar, useSpring } from "../ui";
-import { Ico, Title } from "./kit";
+import { CoLogo, Ico, Title } from "./kit";
 
 const CellCard: React.FC<{ cell: Cell; i: number }> = ({ cell, i }) => {
   const frame = useCurrentFrame();
@@ -21,9 +21,7 @@ const CellCard: React.FC<{ cell: Cell; i: number }> = ({ cell, i }) => {
         return (
           <div key={k} style={{ marginTop: 18, paddingTop: k ? 18 : 0, borderTop: k ? "2px solid #E6E9F2" : "none" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: ind.color, display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
-                <Ico name={ind.icon} size={28} />
-              </div>
+              <CoLogo src={j.logo} size={56} icon={ind.icon} color={ind.color} />
               <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1.15 }}>{j.pos}</div>
             </div>
             <div style={{ fontSize: 24, color: C.muted, marginTop: 6 }}>{j.co}</div>
