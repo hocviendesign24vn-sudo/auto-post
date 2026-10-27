@@ -236,7 +236,7 @@ def script(d):
     lines.append(
         "Xin chào bạn, đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. "
         "Dự án này được nghiên cứu và phát triển tại Học viện Design24. "
-        f"Hôm nay, vào lúc 7 giờ sáng, ngày {dd}, tháng {mm}, năm {yy}, chúng tôi cập nhật bản tin việc làm, "
+        f"Hôm nay, ngày {dd}, tháng {mm}, năm {yy}, chúng tôi cập nhật bản tin việc làm, "
         f"gồm có {total} vị trí. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
     )
     # Nhà tuyển dụng (tường logo) và số vị trí theo khu vực
