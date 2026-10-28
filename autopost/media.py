@@ -14,7 +14,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO = "hocviendesign24vn-sudo/auto-post"
+REPO = "ngminhthotech/auto-post"
 BRANCH = "media"
 RAW = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
 
