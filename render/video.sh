@@ -14,6 +14,12 @@ if [ "$voice" = "--voice" ]; then
   python3 "$root/render/voice.py" "$json" --style "$style" --out "$tmp/props.json" >/dev/null
   json="$tmp/props.json"
 fi
+if [ "${COMP:-BangTinPro}" = "BangTinPro" ]; then
+  # Tư liệu thật: logo/ảnh bìa nhà tuyển dụng (tin có "id" CareerViet) và cảnh quay nền (BROLL_SET=1 hoặc 2)
+  [ "$json" = "$tmp/props.json" ] || { cp "$json" "$tmp/props.json"; json="$tmp/props.json"; }
+  python3 "$root/render/tulieu.py" logo "$json" || echo "Bỏ qua logo: lỗi tải" >&2
+  python3 "$root/render/tulieu.py" broll "$json" --set "${BROLL_SET:-1}" || echo "Bỏ qua cảnh quay nền: lỗi tải" >&2
+fi
 npx remotion render "${COMP:-BangTinPro}" "$tmp/raw.mp4" --props="$json" --codec=h264 --crf=20 --log=error
 ffmpeg -y -loglevel error -i "$tmp/raw.mp4" -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k -movflags +faststart "$out"
 rm -rf "$tmp"

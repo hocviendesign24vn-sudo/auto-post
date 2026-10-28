@@ -1,5 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { Video } from "@remotion/media";
 import { C } from "./brand";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -41,7 +42,30 @@ export const Logo: React.FC<{ width: number; pad?: number }> = ({ width, pad = 1
 );
 
 // Nền gradient thương hiệu, các khối sáng trôi chậm, lưới chấm và vệt sáng quét chéo.
+// Cảnh quay thật làm nền cho cảnh hiện tại (BangTinPro gán theo từng cảnh); null thì dùng nền màu thương hiệu
+export const BgVideoContext = React.createContext<{ src: string; rate: number } | null>(null);
+
+// Nền cảnh quay: video phủ kín khung, phóng chậm, phủ lớp màu thương hiệu để chữ vẫn dễ đọc
+const FootageBackground: React.FC<{ src: string; rate: number }> = ({ src, rate }) => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ background: C.deep, overflow: "hidden" }}>
+      <AbsoluteFill style={{ scale: String(1.08 + frame * 0.0006) }}>
+        <Video src={/^https?:/.test(src) ? src : staticFile(src)} muted loop playbackRate={rate} style={{ position: "absolute", top: 0, left: "50%", height: "100%", width: (16 / 9) * 1920, maxWidth: "none", translate: "-50% 0" }} />
+      </AbsoluteFill>
+      <AbsoluteFill style={{ background: `linear-gradient(180deg, ${C.deep}D9 0%, ${C.navy}99 26%, ${C.navy}73 55%, ${C.deep}D9 100%)` }} />
+      <AbsoluteFill style={{ background: "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.45) 100%)" }} />
+    </AbsoluteFill>
+  );
+};
+
 export const BrandBackground: React.FC<{ light?: boolean }> = ({ light }) => {
+  const bg = React.useContext(BgVideoContext);
+  if (bg && !light) return <FootageBackground src={bg.src} rate={bg.rate} />;
+  return <ColorBackground light={light} />;
+};
+
+const ColorBackground: React.FC<{ light?: boolean }> = ({ light }) => {
   const frame = useCurrentFrame();
   const t = frame / 30;
   const orb = (x: number, y: number, r: number, color: string, speed: number, phase: number) => (

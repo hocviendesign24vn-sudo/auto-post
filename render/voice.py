@@ -49,18 +49,24 @@ ABBR = [  # viết tắt trên ảnh -> cách đọc
     (r"&", "và"),
     (r"\s*\(([^)]*)\)", r", \1,"),
     (r"\bĐBSCL\b", "Đồng bằng sông Cửu Long"),
+    (r"\bTNHH\b", "trách nhiệm hữu hạn"),
+    (r"\bTMCP\b", "thương mại cổ phần"),
+    (r"\bMTV\b", "một thành viên"),
+    (r"\bCông ty CP\b", "Công ty cổ phần"),
 ]
 
 DIGITS = "không một hai ba bốn năm sáu bảy tám chín".split()
 
 
 def spoken(text):
+    text = text.replace("24/7", "hai bốn trên bảy")
     for pat, rep in ABBR:
         text = re.sub(pat, rep, text)
     text = re.sub(r"(\d+)\s*[–-]\s*(\d+)", r"\1 đến \2", text)
     text = re.sub(r",\s*([,.])", r"\1", text)
     text = re.sub(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", r"\1 tháng \2 năm \3", text)
     text = re.sub(r"\b(\d{1,2})/(\d{1,2})\b", r"\1 tháng \2", text)
+    text = re.sub(r"\b24\b", "hai mươi bốn", text)  # Vbee hay đọc "hai mươi tư"; Design24 đã có trong phat-am.json là "hai bốn"
     text = re.sub(r"\s+", " ", text).strip()
     # Viết hoa chữ đầu mỗi câu
     return re.sub(r"(^|[.!?]\s+)(\w)", lambda m: m.group(1) + m.group(2).upper(), text)
@@ -218,25 +224,36 @@ def pay_text(sal):
 
 def script(d):
     """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
-    mở đầu, bản đồ, ngành nghề, top lương, từng khu vực, miền Tây, 3 bước, kết.
+    mở đầu, nhà tuyển dụng, ngành nghề, top lương, Cần Thơ, miền Tây, khu vực khác, sắp hết hạn, cách ứng tuyển, mã QR, kết.
     Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
     jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
     if d.get("grid"):
         jobs += [dict(j, region=c["province"]) for c in d["grid"]["cells"] for j in c["jobs"]]
     total = len(jobs)
     top = max((sal_max(j["sal"]) or 0) for j in jobs)
+    dd, mm, yy = (int(x) for x in d["date"].split("/"))
     lines = []
     lines.append(
-        f"Đì sai hai bốn xin chào! Bạn đang tìm việc ở Cần Thơ, miền Tây, hay Thành phố Hồ Chí Minh? "
-        f"Hôm nay, có tới {total} việc làm mới. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
+        "Xin chào bạn, đến với bản tin Tìm Việc Số, được cập nhật liên tục 24/7. "
+        "Dự án này được nghiên cứu và phát triển tại Học viện Design24. "
+        f"Hôm nay, ngày {dd}, tháng {mm}, năm {yy}, chúng tôi cập nhật bản tin việc làm, "
+        f"gồm có {total} vị trí. Lương cao nhất, lên đến {int(top)} triệu đồng một tháng!"
     )
-    # Bản đồ
-    parts = ["Cùng xem bản đồ việc làm nhé."]
-    for l in d["lists"]:
-        parts.append(f"{region_name(l['name'])}, có {count_word(len(l['jobs']))} vị trí.")
+    # Nhà tuyển dụng (tường logo) và số vị trí theo khu vực
+    cos = []
+    for j in jobs:
+        co = readable(re.sub(r"\s*\(.*?\)", "", j["co"]))
+        if co and co not in cos:
+            cos.append(co)
+    parts = []
+    if cos:
+        parts.append("Nhà tuyển dụng hôm nay có " + ", ".join(cos[:3]) + (", và nhiều đơn vị khác." if len(cos) > 3 else "."))
+    ct = [l for l in d["lists"] if "cần thơ" in l["name"].lower()]
+    counts = [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in ct]
     if d.get("grid"):
-        provs = [c["province"] for c in d["grid"]["cells"]]
-        parts.append("Miền Tây có thêm cơ hội ở " + ", ".join(provs[:-1]) + (", và " + provs[-1] if len(provs) > 1 else provs[0]) + ".")
+        counts.append(f"miền Tây có {count_word(sum(len(c['jobs']) for c in d['grid']['cells']))} vị trí")
+    counts += [f"{region_name(l['name'])} có {count_word(len(l['jobs']))} vị trí" for l in d["lists"] if l not in ct]
+    parts.append(", ".join(counts) + ".")
     lines.append(fit(parts, "", limit=260))
     # Ngành nghề
     counts = {}
@@ -261,8 +278,7 @@ def script(d):
         lines.append(s)
     else:
         lines.append("Và đây, là những vị trí có mức lương hấp dẫn nhất hôm nay!")
-    # Từng khu vực
-    for l in d["lists"]:
+    def region_line(l):
         ranked_jobs = sorted(l["jobs"], key=lambda j: -(sal_max(j["sal"]) or 0))
         star = next((j for j in ranked_jobs if readable(j["pos"])), None)
         others = [readable(j["pos"]) for j in l["jobs"] if j is not star]
@@ -277,7 +293,11 @@ def script(d):
         tail = f"Ngoài ra, còn {count_word(len(l['jobs']) - 1)} vị trí khác"
         if others:
             tail += ", như " + lower_first(others[0])
-        lines.append(fit([s], tail + ".", limit=280))
+        return fit([s], tail + ".", limit=280)
+    # Thứ tự khu vực giống video: Cần Thơ, miền Tây, rồi TP.HCM
+    can_tho = [l for l in d["lists"] if "cần thơ" in l["name"].lower()]
+    for l in can_tho:
+        lines.append(region_line(l))
     # Miền Tây
     if d.get("grid") and d["grid"]["cells"]:
         parts = ["Về miền Tây."]
@@ -289,13 +309,34 @@ def script(d):
             extra = f", lương tới {int(m)} triệu" if m and n == 0 else ""
             parts.append(f"{c['province']}, đang cần {lower_first(readable(j['pos']))}{extra}.")
         lines.append(fit(parts, "", limit=260))
-    # 3 bước + chống lừa đảo
+    for l in d["lists"]:
+        if l not in can_tho:
+            lines.append(region_line(l))
+    # Sắp hết hạn nộp (giống soonJobs trong DeadlineScene.tsx)
+    def dl_key(j):
+        dd_, mm_ = (int(x) for x in j["dl"].split("/")[:2])
+        return mm_ * 100 + dd_
+    soon = sorted([j for j in jobs if j.get("dl")], key=dl_key)[:4]
+    if soon:
+        parts = ["Đừng bỏ lỡ những vị trí sắp hết hạn nộp!"]
+        for j in soon:
+            pos, co = readable(j["pos"]), readable(re.sub(r"\s*\(.*?\)", "", j["co"]))
+            if pos:
+                parts.append(f"Ngày {j['dl']}, {co + ' tuyển ' + lower_first(pos) if co else lower_first(pos)}.")
+        lines.append(fit(parts, "", limit=280))
+    # Cách ứng tuyển: chọn việc, rồi một trong hai cách (độc lập, không phải các bước nối tiếp)
     lines.append(
-        "Ứng tuyển chỉ với ba bước. Một, chọn việc phù hợp. Hai, nhắn Da lô, hoặc phan pết Đì sai hai bốn. "
-        "Ba, nhận đường dẫn, và nộp hồ sơ. Lưu ý! Không nộp phí, không đặt cọc, để được nhận việc."
+        "Ứng tuyển thế nào? Trước hết, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
+        "Sau đó, liên hệ trực tiếp với nhà tuyển dụng. Hoặc nhanh hơn, truy cập timviecso.vn, "
+        "hoặc tải ứng dụng Tìm Việc Số trên CH Play."
+    )
+    # 2 mã QR (QRScene.tsx: trên là app CH Play, dưới là website)
+    lines.append(
+        "Quét mã phía trên để tải ứng dụng Tìm Việc Số trên CH Play. "
+        "Hoặc quét mã phía dưới để truy cập website timviecso.vn, xem đầy đủ tin tuyển dụng và ứng tuyển nhanh hơn."
     )
     # Kết
-    lines.append("Theo dõi Đì sai hai bốn, để nhận việc mới lúc tám giờ sáng, và hai giờ chiều mỗi ngày nhé!")
+    lines.append("Việc làm mới được cập nhật liên tục. Theo dõi Đì sai hai bốn, để không bỏ lỡ nhé!")
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 
@@ -465,7 +506,17 @@ def main(argv=None):
     data["voice"] = []
     for i, line in enumerate(lines):
         f = folder / f"{i}.mp3"
-        tts(line, voice, f, a.speed)
+        if i == 0 and line.startswith("Xin chào bạn,"):
+            # "Xin chào bạn" đọc riêng, chậm hơn, nghỉ ngắn rồi mới vào phần còn lại cho rõ lời
+            head, rest = line.split(",", 1)
+            pa, pb = folder / "0a.mp3", folder / "0b.mp3"
+            tts(head + "!", voice, pa, a.speed * 0.9)
+            tts(rest.strip()[:1].upper() + rest.strip()[1:], voice, pb, a.speed)
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(pa), "-f", "lavfi", "-t", "0.25", "-i", "anullsrc=r=24000:cl=mono", "-i", str(pb),
+                            "-filter_complex", "[0:a]aresample=24000,aformat=channel_layouts=mono[x];[2:a]aresample=24000,aformat=channel_layouts=mono[z];[x][1:a][z]concat=n=3:v=0:a=1",
+                            "-b:a", "128k", str(f)], check=True)
+        else:
+            tts(line, voice, f, a.speed)
         data["voice"].append({"src": f"voice/{slug}/{i}.mp3", "dur": round(duration(f), 2), "text": caption(line)})
     Path(a.out).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(a.out)

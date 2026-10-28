@@ -1,10 +1,10 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, useCurrentFrame } from "remotion";
 import { C, FONT, THEME } from "../brand";
 import type { JobList } from "../types";
 import { industryOf, salaryMax } from "../derive";
 import { BrandBackground, ease, TopBar, useSpring } from "../ui";
-import { Ico, IconBadge } from "./kit";
+import { CoLogo, Ico, IconBadge, mediaSrc } from "./kit";
 
 // Mỗi khu vực: một việc nổi bật (lương cao nhất) phóng to, sau đó các việc còn lại trượt vào.
 export const RegionScene: React.FC<{ list: JobList; dur: number }> = ({ list, dur }) => {
@@ -21,6 +21,13 @@ export const RegionScene: React.FC<{ list: JobList; dur: number }> = ({ list, du
     <AbsoluteFill style={{ fontFamily: FONT, color: "#fff" }}>
       <BrandBackground />
       <TopBar />
+      {/* Ảnh bìa của nhà tuyển dụng nổi bật (từ tin gốc) làm nền dải tiêu đề */}
+      {star.cover && (
+        <div style={{ position: "absolute", top: 150, left: 0, right: 0, height: 250, overflow: "hidden", opacity: ease(frame, 0, 14, [0, 1]) }}>
+          <Img src={mediaSrc(star.cover)} style={{ width: "100%", height: "100%", objectFit: "cover", scale: String(1.05 + frame * 0.0008) }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(4,12,70,.92) 0%, rgba(4,12,70,.6) 60%, rgba(4,12,70,.35) 100%)" }} />
+        </div>
+      )}
       <div style={{ position: "absolute", top: 200, left: 60, right: 60, display: "flex", alignItems: "center", gap: 22, clipPath: `inset(0 ${wipe}% 0 0)` }}>
         <div style={{ width: 96, height: 96, borderRadius: 28, background: `linear-gradient(135deg, ${th.from}, ${th.to})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 14px 34px ${th.from}66` }}>
           <Ico name="pin" size={56} />
@@ -37,7 +44,7 @@ export const RegionScene: React.FC<{ list: JobList; dur: number }> = ({ list, du
           <Ico name="sparkles" size={28} /> VIỆC NỔI BẬT
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 30, marginTop: 10 }}>
-          <IconBadge name={ind.icon} size={150} color={ind.color} delay={20} />
+          {star.logo ? <CoLogo src={star.logo} size={150} icon={ind.icon} color={ind.color} /> : <IconBadge name={ind.icon} size={150} color={ind.color} delay={20} />}
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 50, fontWeight: 900, lineHeight: 1.1 }}>{star.pos}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 32, color: C.muted, marginTop: 8 }}>
@@ -89,9 +96,7 @@ export const RegionScene: React.FC<{ list: JobList; dur: number }> = ({ list, du
                   translate: `${ease(frame, d, d + 16, [500, 0])}px 0px`,
                 }}
               >
-                <div style={{ width: 56, height: 56, borderRadius: 16, background: ji.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Ico name={ji.icon} size={32} />
-                </div>
+                <CoLogo src={j.logo} size={56} icon={ji.icon} color={ji.color} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 32, fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{j.pos}</div>
                   <div style={{ fontSize: 24, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{j.co}</div>
