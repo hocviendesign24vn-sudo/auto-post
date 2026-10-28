@@ -224,7 +224,8 @@ def pay_text(sal):
 
 def script(d):
     """Lời đọc cho mẫu video/src/v2/BangTinPro.tsx, đúng thứ tự cảnh:
-    mở đầu, nhà tuyển dụng, ngành nghề, top lương, Cần Thơ, miền Tây, khu vực khác, sắp hết hạn, cách ứng tuyển, mã QR, kết.
+    mở đầu, nhà tuyển dụng, ngành nghề, top lương, Cần Thơ, miền Tây, khu vực khác, sắp hết hạn, cách ứng tuyển, kết.
+    Không đọc số điện thoại, không nhắc mã QR (TikTok và các mạng xã hội hay giảm hiển thị video kéo người xem ra ngoài).
     Câu ngắn, có dấu ngắt để giọng lên xuống tự nhiên; tên tiếng Anh khó đọc thì bỏ hoặc dịch."""
     jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
     if d.get("grid"):
@@ -329,11 +330,6 @@ def script(d):
         "Ứng tuyển thế nào? Trước hết, chọn việc làm phù hợp, xem kỹ yêu cầu, mức lương, hạn nộp và địa điểm. "
         "Sau đó, liên hệ trực tiếp với nhà tuyển dụng. Hoặc nhanh hơn, truy cập timviecso.vn, "
         "hoặc tải ứng dụng Tìm Việc Số trên CH Play."
-    )
-    # 2 mã QR (QRScene.tsx: trên là app CH Play, dưới là website)
-    lines.append(
-        "Quét mã phía trên để tải ứng dụng Tìm Việc Số trên CH Play. "
-        "Hoặc quét mã phía dưới để truy cập website timviecso.vn, xem đầy đủ tin tuyển dụng và ứng tuyển nhanh hơn."
     )
     # Kết
     lines.append("Việc làm mới được cập nhật liên tục. Theo dõi Đì sai hai bốn, để không bỏ lỡ nhé!")

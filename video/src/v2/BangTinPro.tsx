@@ -18,7 +18,6 @@ import { RegionScene } from "./RegionScene";
 import { WestScene } from "./WestScene";
 import { StepsScene } from "./StepsScene";
 import { DeadlineScene, soonJobs } from "./DeadlineScene";
-import { QRScene } from "./QRScene";
 import { Subtitles } from "./Subtitles";
 
 export const FPS = 30;
@@ -44,7 +43,6 @@ export const proScenes = (d: BangTinData): Scene[] => {
   d.lists.filter((l) => !isCanTho(l)).forEach((l) => s.push(region(l)));
   if (soonJobs(d).length) s.push({ key: "deadline", dur: 150, el: () => <DeadlineScene data={d} /> });
   s.push({ key: "steps", dur: 180, el: () => <StepsScene /> });
-  s.push({ key: "qr", dur: 150, el: () => <QRScene /> });
   s.push({ key: "outro", dur: 170, el: () => <Outro data={d} />, subs: false });
   return s.map((x, i) => {
     const v = d.voice?.[i];

@@ -4,11 +4,10 @@ import { C, CONTACT, FONT } from "../brand";
 import type { BangTinData } from "../types";
 import { BrandBackground, ease, Icon, Logo, Reveal, useSpring } from "../ui";
 
+// Không đưa số điện thoại, email hay mã QR lên hình: TikTok và các mạng xã hội hay giảm hiển thị những video này.
 const ITEMS = [
-  { icon: "phone", label: "Hotline", value: CONTACT.hotline },
-  { icon: "chat", label: "Zalo", value: CONTACT.zalo },
   { icon: "globe", label: "Website", value: CONTACT.website },
-  { icon: "mail", label: "Email", value: CONTACT.email },
+  { icon: "send", label: "Ứng dụng", value: "Tìm Việc Số trên CH Play" },
 ];
 
 export const Outro: React.FC<{ data: BangTinData }> = ({ data }) => {
