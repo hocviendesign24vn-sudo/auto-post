@@ -1,6 +1,5 @@
 import { Composition, Folder } from "remotion";
 import { BangTinPro, proTotalFrames } from "./v2/BangTinPro";
-import { BangTinNgan, nganTotalFrames } from "./v2/BangTinNgan";
 import { BangTin, FPS, totalFrames } from "./BangTin";
 import type { BangTinData } from "./types";
 import sample from "../../examples/bangtin-mau.json";
@@ -17,16 +16,6 @@ export const RemotionRoot: React.FC = () => (
     durationInFrames={proTotalFrames(sample as BangTinData)}
     defaultProps={sample as BangTinData}
     calculateMetadata={({ props }) => ({ durationInFrames: proTotalFrames(props) })}
-  />
-  <Composition
-    id="BangTinNgan"
-    component={BangTinNgan}
-    width={1080}
-    height={1920}
-    fps={FPS}
-    durationInFrames={nganTotalFrames(sample as BangTinData)}
-    defaultProps={sample as BangTinData}
-    calculateMetadata={({ props }) => ({ durationInFrames: nganTotalFrames(props) })}
   />
   <Folder name="Mau-cu">
   <Composition

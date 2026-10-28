@@ -299,34 +299,6 @@ def script(d):
     return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
 
 
-def script_ngan(d):
-    """Lời đọc cho bản ngắn video/src/v2/BangTinNgan.tsx: việc lương cao nhất, top lương, bản đồ, mời bình luận.
-    Câu đầu nói ngay việc và mức lương, không chào hỏi, để người lướt dừng lại xem."""
-    jobs = [dict(j, region=l["name"]) for l in d["lists"] for j in l["jobs"]]
-    if d.get("grid"):
-        jobs += [dict(j, region=c["province"]) for c in d["grid"]["cells"] for j in c["jobs"]]
-    total = len(jobs)
-    tops = sorted([j for j in jobs if sal_max(j["sal"])], key=lambda j: -sal_max(j["sal"]))
-    named = [(j, readable(j["pos"])) for j in tops]
-    named = [(j, p) for j, p in named if p]
-    lines = []
-    if named:
-        j0, p0 = named[0]
-        lines.append(f"{p0}, lương lên đến {int(sal_max(j0['sal']))} triệu, đang tuyển gấp ở {region_name(j0['region'])}! "
-                     f"Hôm nay còn {total - 1} việc làm mới khác, xem nhanh nhé.")
-    else:
-        lines.append(f"Hôm nay có {total} việc làm mới, lương lên đến {int(sal_max(tops[0]['sal']))} triệu! Xem nhanh nhé.")
-    rest = [f"{lower_first(p)}, {int(sal_max(j['sal']))} triệu" for j, p in named[1:4]]
-    lines.append("Top lương hôm nay. " + (". ".join(r[:1].upper() + r[1:] for r in rest) + "." if rest else ""))
-    parts = [f"{region_name(l['name'])}, {count_word(len(l['jobs']))} vị trí." for l in d["lists"]]
-    if d.get("grid") and d["grid"]["cells"]:
-        parts.append(f"Miền Tây, {count_word(sum(len(c['jobs']) for c in d['grid']['cells']))} vị trí.")
-    lines.append("Việc làm theo khu vực. " + " ".join(parts))
-    lines.append("Bạn đang tìm việc ở tỉnh nào? Bình luận ngay bên dưới, Design24 gửi thêm việc phù hợp cho bạn. "
-                 f"Xem đủ {total} việc, tại timviecso.vn. Lưu ý! Không nộp phí khi ứng tuyển.")
-    return [_sub_words(spoken(x), PRON["doc"]) for x in lines]
-
-
 def caption(line):
     """Chữ hiện trên phụ đề: đổi cách đọc phiên âm về chữ viết gốc (Da lô -> Zalo, số điện thoại...)."""
     for word, spoken_form in sorted(PRON["doc"].items(), key=lambda x: -len(x[1])):
@@ -476,11 +448,11 @@ def main(argv=None):
     p.add_argument("--out", help="ghi JSON bảng tin kèm trường voice")
     p.add_argument("--voice", default=os.environ.get("VBEE_VOICE", DEFAULT_VOICE))
     p.add_argument("--speed", type=float, default=float(os.environ.get("VBEE_SPEED", DEFAULT_SPEED)))
-    p.add_argument("--style", choices=["pro", "ngan", "basic"], default="pro", help="pro: mẫu BangTinPro; ngan: bản ngắn BangTinNgan; basic: mẫu cũ")
+    p.add_argument("--style", choices=["pro", "basic"], default="pro", help="pro: mẫu BangTinPro; basic: mẫu cũ")
     p.add_argument("--dry-run", action="store_true", help="chỉ in lời đọc, không gọi Vbee")
     a = p.parse_args(argv)
     data = json.loads(Path(a.json).read_text(encoding="utf-8"))
-    lines = {"pro": script, "ngan": script_ngan, "basic": script_basic}[a.style](data)
+    lines = script(data) if a.style == "pro" else script_basic(data)
     if a.dry_run:
         for i, line in enumerate(lines):
             print(f"[{i}] ({len(line)} ký tự) {line}")
