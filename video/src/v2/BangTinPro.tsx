@@ -22,7 +22,7 @@ export const FPS = 30;
 const T = 18;
 const VOICE_DELAY = 8;
 
-type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; subs?: boolean };
+export type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; subs?: boolean };
 
 // Thứ tự cảnh phải khớp với thứ tự lời đọc trong render/voice.py (script_pro)
 export const proScenes = (d: BangTinData): Scene[] => {
@@ -36,10 +36,7 @@ export const proScenes = (d: BangTinData): Scene[] => {
   if (d.grid?.cells.length) s.push({ key: "west", dur: 160, el: () => <WestScene grid={d.grid!} /> });
   s.push({ key: "steps", dur: 150, el: () => <StepsScene /> });
   s.push({ key: "outro", dur: 170, el: () => <Outro data={d} />, subs: false });
-  return s.map((x, i) => {
-    const v = d.voice?.[i];
-    return v ? { ...x, dur: Math.max(x.dur, VOICE_DELAY + Math.ceil(v.dur * FPS) + T + 14) } : x;
-  });
+  return fitVoice(d, s);
 };
 
 const TRANSITIONS: (() => TransitionPresentation<any>)[] = [ // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -53,15 +50,23 @@ const TRANSITIONS: (() => TransitionPresentation<any>)[] = [ // eslint-disable-l
   () => fade(),
 ];
 
-export const proTotalFrames = (d: BangTinData) => {
-  const s = proScenes(d);
-  return s.reduce((a, x) => a + x.dur, 0) - (s.length - 1) * T;
-};
+// Kéo dài mỗi cảnh cho vừa lời đọc của cảnh đó
+export const fitVoice = (d: BangTinData, s: Scene[]) =>
+  s.map((x, i) => {
+    const v = d.voice?.[i];
+    return v ? { ...x, dur: Math.max(x.dur, VOICE_DELAY + Math.ceil(v.dur * FPS) + T + 14) } : x;
+  });
 
-export const BangTinPro: React.FC<BangTinData> = (data) => {
+export const seriesFrames = (s: Scene[]) => s.reduce((a, x) => a + x.dur, 0) - (s.length - 1) * T;
+
+export const proTotalFrames = (d: BangTinData) => seriesFrames(proScenes(d));
+
+export const BangTinPro: React.FC<BangTinData> = (data) => <VoicedSeries data={data} scenes={proScenes(data)} />;
+
+// Chuỗi cảnh có chuyển cảnh, nhạc nền (tự nhỏ lại khi có giọng), tiếng whoosh, giọng đọc và phụ đề
+export const VoicedSeries: React.FC<{ data: BangTinData; scenes: Scene[] }> = ({ data, scenes: s }) => {
   const { durationInFrames } = useVideoConfig();
   const frame = useCurrentFrame();
-  const s = proScenes(data);
   const starts: number[] = [];
   let at = 0;
   s.forEach((x, i) => {

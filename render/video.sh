@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Dựng video động thương hiệu D24 (Remotion, mẫu BangTinPro; COMP=BangTin để dùng mẫu cũ) từ JSON bảng tin, có nhạc nền, chuẩn âm lượng -14 LUFS.
+# Dựng video động thương hiệu D24 (Remotion, mẫu BangTinPro; COMP=BangTinNgan cho bản ngắn khoảng 35 giây; COMP=BangTin để dùng mẫu cũ) từ JSON bảng tin, có nhạc nền, chuẩn âm lượng -14 LUFS.
 # Cách dùng: render/video.sh examples/bangtin-mau.json out/video.mp4 [--voice]
 #   --voice: thêm giọng đọc Vbee (cần khóa Vbee trong môi trường, xem render/voice.py)
 set -euo pipefail
@@ -10,7 +10,7 @@ cd "$root/video"
 [ -f public/music.wav ] || python3 "$root/render/music.py" public/ >/dev/null
 tmp="$(mktemp -d)"
 if [ "$voice" = "--voice" ]; then
-  style=pro; [ "${COMP:-BangTinPro}" = "BangTin" ] && style=basic
+  style=pro; [ "${COMP:-BangTinPro}" = "BangTin" ] && style=basic; [ "${COMP:-}" = "BangTinNgan" ] && style=ngan
   python3 "$root/render/voice.py" "$json" --style "$style" --out "$tmp/props.json" >/dev/null
   json="$tmp/props.json"
 fi
