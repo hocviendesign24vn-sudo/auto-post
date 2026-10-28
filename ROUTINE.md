@@ -27,7 +27,7 @@
 
 ### Đăng tự động khoảng 2 giờ một tin
 
-Tác vụ Claude "Đăng timviecso.vn (2 giờ 1 tin)" chạy `python3 -m autopost.careerviet --max 1` mỗi 2 giờ (`.github/workflows/quet-tin.yml` chỉ để chạy tay): lấy tin mới nhất trên CareerViet có nơi làm việc chính ở Cần Thơ hoặc ĐBSCL, lọc cố định (còn hạn, có tên công ty, không có dấu hiệu thu phí, chưa có trên trang), tự gắn logo và link nguồn, đăng 1 tin. Không có tin mới thì chờ lượt sau.
+Tác vụ Claude "Đăng timviecso.vn (2 giờ 1 tin)" chạy `python3 -m autopost.careerviet --max 1` mỗi 2 giờ (`.github/workflows/quet-tin.yml` chỉ để chạy tay): lấy tin mới nhất trên CareerViet có nơi làm việc chính ở Cần Thơ, ĐBSCL hoặc TP.HCM, chọn khu vực đang thiếu nhất trên trang theo tỉ lệ Cần Thơ 4 : ĐBSCL 3 : TP.HCM 2 (hòa thì ưu tiên Cần Thơ, rồi ĐBSCL; khu vực thiếu không có tin mới thì lấy khu vực kế), lọc cố định (còn hạn, có tên công ty, không có dấu hiệu thu phí, chưa có trên trang), tự gắn logo và link nguồn, đăng 1 tin. Không có tin mới thì chờ lượt sau.
 
 ### Routine rà soát timviecso.vn (tạm dừng)
 
