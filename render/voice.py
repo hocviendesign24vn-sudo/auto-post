@@ -502,17 +502,10 @@ def main(argv=None):
     data["voice"] = []
     for i, line in enumerate(lines):
         f = folder / f"{i}.mp3"
-        if i == 0 and line.startswith("Xin chào bạn,"):
-            # "Xin chào bạn" đọc riêng, chậm hơn, nghỉ ngắn rồi mới vào phần còn lại cho rõ lời
-            head, rest = line.split(",", 1)
-            pa, pb = folder / "0a.mp3", folder / "0b.mp3"
-            tts(head + "!", voice, pa, a.speed * 0.9)
-            tts(rest.strip()[:1].upper() + rest.strip()[1:], voice, pb, a.speed)
-            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(pa), "-f", "lavfi", "-t", "0.25", "-i", "anullsrc=r=24000:cl=mono", "-i", str(pb),
-                            "-filter_complex", "[0:a]aresample=24000,aformat=channel_layouts=mono[x];[2:a]aresample=24000,aformat=channel_layouts=mono[z];[x][1:a][z]concat=n=3:v=0:a=1",
-                            "-b:a", "128k", str(f)], check=True)
-        else:
-            tts(line, voice, f, a.speed)
+        # Câu mở đầu đọc liền một lượt: tách "Xin chào bạn!" ra đọc riêng thì giọng clone lên giọng
+        # ở cuối câu cảm thán, chữ "chào" nghe thành "chao". Đọc liền thì "chào" xuống giọng đúng dấu huyền
+        # và giọng vẫn tự nghỉ khoảng 0,27 giây sau "bạn,".
+        tts(line, voice, f, a.speed)
         data["voice"].append({"src": f"voice/{slug}/{i}.mp3", "dur": round(duration(f), 2), "text": caption(line)})
     Path(a.out).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(a.out)
