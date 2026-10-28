@@ -17,6 +17,8 @@ Ví dụ:
   python -m autopost.timviecso post tin.json --dry-run
   python -m autopost.timviecso post tin.json
   python -m autopost.timviecso delete <id> --reason "..."
+  python -m autopost.timviecso expired            # liệt kê tin đã quá hạn nộp
+  python -m autopost.timviecso expired --delete   # gỡ các tin đó
 """
 
 import argparse
@@ -27,7 +29,8 @@ import re
 import sys
 import time
 import unicodedata
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -68,6 +71,12 @@ def call(method, url, payload=None):
 
 def list_jobs():
     return call("GET", API) or []
+
+
+def expired_jobs(today=None):
+    """Tin có hạn nộp trước hôm nay (giờ Việt Nam). Tin không ghi hạn thì giữ lại."""
+    today = today or datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
+    return [j for j in list_jobs() if (j.get("deadline") or "")[:10] and j["deadline"][:10] < today]
 
 
 # Ảnh chung của trang tuyển dụng, không phải logo công ty.
@@ -161,12 +170,30 @@ def main(argv=None):
     pd = sub.add_parser("delete", help="Gỡ một tin khỏi trang")
     pd.add_argument("id")
     pd.add_argument("--reason", required=True, help="Lý do gỡ, in ra để ghi nhật ký")
+    pe = sub.add_parser("expired", help="Liệt kê (hoặc gỡ) tin đã quá hạn nộp")
+    pe.add_argument("--delete", action="store_true", help="Gỡ các tin quá hạn khỏi trang")
     args = p.parse_args(argv)
 
     if args.cmd == "delete":
         call("DELETE", f"{API}/{args.id}")
         print(f"Đã gỡ {args.id}: {args.reason}")
         return 0
+
+    if args.cmd == "expired":
+        jobs = expired_jobs()
+        failed = 0
+        for j in jobs:
+            line = f"{j.get('_id')}  hạn {j['deadline'][:10]}  {j.get('location')}  |  {j.get('title')}  |  {(j.get('employer') or {}).get('name')}"
+            if args.delete:
+                try:
+                    call("DELETE", f"{API}/{j['_id']}")
+                    line = "Đã gỡ " + line
+                except TimviecsoError as exc:
+                    failed += 1
+                    line = f"LỖI gỡ {line}: {exc}"
+            print(line)
+        print(f"{len(jobs)} tin quá hạn" + (f", gỡ lỗi {failed}" if failed else ""))
+        return 1 if failed else 0
 
     if args.cmd == "list":
         for j in list_jobs():
