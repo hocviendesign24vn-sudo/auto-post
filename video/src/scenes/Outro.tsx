@@ -4,11 +4,10 @@ import { C, CONTACT, FONT } from "../brand";
 import type { BangTinData } from "../types";
 import { BrandBackground, ease, Icon, Logo, Reveal, useSpring } from "../ui";
 
+// Không đưa số điện thoại, email hay mã QR lên hình: TikTok và các mạng xã hội hay giảm hiển thị những video này.
 const ITEMS = [
-  { icon: "phone", label: "Hotline", value: CONTACT.hotline },
-  { icon: "chat", label: "Zalo", value: CONTACT.zalo },
   { icon: "globe", label: "Website", value: CONTACT.website },
-  { icon: "mail", label: "Email", value: CONTACT.email },
+  { icon: "send", label: "Ứng dụng", value: "Tìm Việc Số trên CH Play" },
 ];
 
 export const Outro: React.FC<{ data: BangTinData }> = ({ data }) => {
@@ -64,7 +63,7 @@ export const Outro: React.FC<{ data: BangTinData }> = ({ data }) => {
         </div>
       </div>
       <div style={{ position: "absolute", bottom: 80, left: 0, right: 0, textAlign: "center", fontSize: 30, fontWeight: 600, opacity: ease(frame, 76, 90, [0, 0.85]) }}>
-        {CONTACT.home} • Việc mới mỗi ngày 8:00 và 14:00
+        {CONTACT.home} • Việc làm mới cập nhật liên tục
       </div>
     </AbsoluteFill>
   );

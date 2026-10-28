@@ -9,3 +9,5 @@ out
 # Nhạc và âm hiệu ứng do render/music.py tạo ra
 public/*.wav
 public/voice/
+public/broll/
+public/media/

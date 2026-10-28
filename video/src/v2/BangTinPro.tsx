@@ -7,20 +7,24 @@ import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import { fade } from "@remotion/transitions/fade";
 import { C } from "../brand";
-import type { BangTinData } from "../types";
+import { BgVideoContext } from "../ui";
+import type { BangTinData, JobList } from "../types";
 import { Outro } from "../scenes/Outro";
 import { Hook } from "./Hook";
-import { MapScene } from "./MapScene";
+import { CompaniesScene } from "./CompaniesScene";
 import { IndustryScene } from "./IndustryScene";
 import { SalaryScene } from "./SalaryScene";
 import { RegionScene } from "./RegionScene";
 import { WestScene } from "./WestScene";
 import { StepsScene } from "./StepsScene";
+import { DeadlineScene, soonJobs } from "./DeadlineScene";
 import { Subtitles } from "./Subtitles";
 
 export const FPS = 30;
 const T = 18;
 const VOICE_DELAY = 8;
+
+const isCanTho = (l: JobList) => /cần thơ/i.test(l.name);
 
 type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; subs?: boolean };
 
@@ -28,13 +32,17 @@ type Scene = { key: string; dur: number; el: (dur: number) => React.ReactNode; s
 export const proScenes = (d: BangTinData): Scene[] => {
   const s: Scene[] = [
     { key: "hook", dur: 110, el: () => <Hook data={d} /> },
-    { key: "map", dur: 150, el: () => <MapScene data={d} /> },
+    { key: "companies", dur: 150, el: () => <CompaniesScene data={d} /> },
     { key: "industry", dur: 140, el: () => <IndustryScene data={d} /> },
     { key: "salary", dur: 150, el: () => <SalaryScene data={d} /> },
-    ...d.lists.map((l) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> })),
   ];
+  // Thứ tự khu vực: Cần Thơ, các tỉnh ĐBSCL, rồi các khu vực còn lại (TP.HCM)
+  const region = (l: JobList) => ({ key: `list-${l.name}`, dur: 200, el: (dur: number) => <RegionScene list={l} dur={dur} /> });
+  d.lists.filter(isCanTho).forEach((l) => s.push(region(l)));
   if (d.grid?.cells.length) s.push({ key: "west", dur: 160, el: () => <WestScene grid={d.grid!} /> });
-  s.push({ key: "steps", dur: 150, el: () => <StepsScene /> });
+  d.lists.filter((l) => !isCanTho(l)).forEach((l) => s.push(region(l)));
+  if (soonJobs(d).length) s.push({ key: "deadline", dur: 150, el: () => <DeadlineScene data={d} /> });
+  s.push({ key: "steps", dur: 180, el: () => <StepsScene /> });
   s.push({ key: "outro", dur: 170, el: () => <Outro data={d} />, subs: false });
   return s.map((x, i) => {
     const v = d.voice?.[i];
@@ -56,6 +64,12 @@ const TRANSITIONS: (() => TransitionPresentation<any>)[] = [ // eslint-disable-l
 export const proTotalFrames = (d: BangTinData) => {
   const s = proScenes(d);
   return s.reduce((a, x) => a + x.dur, 0) - (s.length - 1) * T;
+};
+
+// Clip ngắn hơn cảnh thì phát chậm lại (tối đa một nửa tốc độ), vẫn thiếu thì lặp
+const bgFor = (d: BangTinData, i: number, dur: number) => {
+  const b = d.broll?.length ? d.broll[i % d.broll.length] : undefined;
+  return b ? { src: b.src, rate: Math.max(0.5, Math.min(1, b.dur / (dur / FPS))) } : null;
 };
 
 export const BangTinPro: React.FC<BangTinData> = (data) => {
@@ -83,7 +97,7 @@ export const BangTinPro: React.FC<BangTinData> = (data) => {
               />
             )}
             <TransitionSeries.Sequence name={x.key} durationInFrames={x.dur}>
-              {x.el(x.dur)}
+              <BgVideoContext.Provider value={bgFor(data, i, x.dur)}>{x.el(x.dur)}</BgVideoContext.Provider>
             </TransitionSeries.Sequence>
           </React.Fragment>
         ))}

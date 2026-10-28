@@ -22,10 +22,10 @@ export const Hook: React.FC<{ data: BangTinData }> = ({ data }) => {
         <Logo width={200} pad={20} />
       </div>
       <div style={{ position: "absolute", top: 345, left: 0, right: 0, textAlign: "center", fontSize: 32, fontWeight: 700, opacity: ease(frame, 8, 20, [0, 0.85]) }}>
-        Bảng tin tuyển dụng • {data.date}
+        Bản tin Tìm Việc Số • {data.date}
       </div>
       <div style={{ position: "absolute", top: 430, left: 0, right: 0, textAlign: "center", fontSize: 56, fontWeight: 700, opacity: ease(frame, 4, 16, [0, 1]), translate: `0px ${ease(frame, 4, 20, [40, 0])}px` }}>
-        Bạn đang tìm việc?
+        Cập nhật liên tục 24/7
       </div>
       <div style={{ position: "absolute", top: 520, left: 0, right: 0, textAlign: "center" }}>
         <div style={{ fontSize: 430, fontWeight: 900, letterSpacing: -20, lineHeight: 1, color: "#fff", textShadow: "0 30px 80px rgba(0,0,0,.35)", scale: String(0.85 + 0.15 * punch) }}>
