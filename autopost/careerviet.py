@@ -1,4 +1,8 @@
-"""Quét tin mới nhất trên CareerViet (Cần Thơ và các tỉnh ĐBSCL) rồi đăng lên timviecso.vn/design24/jobs.
+"""Quét tin mới nhất trên CareerViet (Cần Thơ, các tỉnh ĐBSCL, TP.HCM) rồi đăng lên timviecso.vn/design24/jobs.
+
+Cân bằng khu vực: mỗi tin đăng vào khu vực đang thiếu nhất so với tỉ lệ mong muốn
+(WEIGHT: Cần Thơ 4, ĐBSCL 3, TP.HCM 2, tức khoảng 45% / 33% / 22% số tin trên trang).
+Hòa thì ưu tiên Cần Thơ, rồi ĐBSCL, rồi TP.HCM. Khu vực thiếu nhất không có tin mới thì lấy khu vực kế tiếp.
 
 Chạy bằng GitHub Actions (.github/workflows/quet-tin.yml), không cần Claude. Lịch của GitHub
 hay trễ, nên mỗi lần chạy giữ máy khoảng 50 phút và tự quét 5 phút một lần (--loop-minutes, --every).
@@ -34,6 +38,13 @@ CAN_THO = 71
 # An Giang, Bạc Liêu, Bến Tre, Cà Mau, Đồng Tháp, Hậu Giang, Kiên Giang, Sóc Trăng,
 # Tiền Giang, Trà Vinh, Vĩnh Long, "Mekong Delta" (mã tỉnh của CareerViet; Long An đã nhập vào Tây Ninh).
 MEKONG = [76, 781, 75, 78, 67, 780, 77, 79, 73, 74, 70, 1064]
+HCM = 8
+# Khu vực theo thứ tự ưu tiên: (nhãn location trên timviecso, mã tỉnh CareerViet, trọng số).
+REGIONS = [
+    ("TP Cần Thơ", [CAN_THO], 4),
+    ("Đồng bằng sông Cửu Long", MEKONG, 3),
+    ("TP HCM", [HCM], 2),
+]
 JOB_LINK = re.compile(r"/vi/tim-viec-lam/[a-z0-9-]+\.([0-9A-F]{8})\.html")
 # Dấu hiệu tin đòi tiền người lao động.
 SCAM = re.compile(r"đặt cọc|nộp phí|phí hồ sơ|phí đào tạo|phí đồng phục|đóng phí|chuyển khoản trước|"
@@ -84,11 +95,15 @@ def experience(d):
     return f"{lo} - {hi} năm" if lo and hi else f"Từ {lo or hi} năm"
 
 
+def region_of(location_id):
+    return next(r for r in REGIONS if location_id in r[1])
+
+
 def to_job(d, link, location_id):
     """Chuyển tin CareerViet sang dạng tin của timviecso; trả về (tin, lý do loại)."""
     if d.get("job_is_public") == 0:
         return None, "tin không công khai"
-    if d.get("location_id") not in [CAN_THO] + MEKONG:
+    if d.get("location_id") not in region_of(location_id)[1]:
         return None, f"nơi làm việc chính ngoài khu vực ({d.get('location_name_vn')})"
     company = (d.get("emp_name") or d.get("job_contact_company") or "").strip()
     if not company or re.fullmatch(r"confidential|bảo mật|giấu tên|ẩn danh|công ty ẩn danh", company, re.I):
@@ -106,7 +121,7 @@ def to_job(d, link, location_id):
     return {
         "title": d.get("job_title", "").strip(),
         "originalTitle": d.get("job_title", "").strip(),
-        "location": "TP Cần Thơ" if location_id == CAN_THO else "Đồng bằng sông Cửu Long",
+        "location": region_of(location_id)[0],
         "employer": {"name": company, "logo": d.get("emp_logo") or "",
                      "industry": industries[0]["industry_name_vn"] if industries else ""},
         "salary": money(d),
@@ -125,33 +140,56 @@ def to_job(d, link, location_id):
     }, None
 
 
+def region_order(counts):
+    """Khu vực thiếu nhất so với trọng số đứng trước; hòa thì theo thứ tự ưu tiên."""
+    return sorted(REGIONS, key=lambda r: (counts.get(r[0], 0) / r[2], REGIONS.index(r)))
+
+
 def scan(max_posts, dry_run=False, max_checks=80):
     posted = timviecso.list_jobs()
     on_site = {m for j in posted for line in j.get("description") or [] for m in JOB_LINK.findall(line)}
-    found = {}  # mã tin -> (link, mã tỉnh)
-    for loc in [CAN_THO] + MEKONG:
-        try:
-            for job_id, link in list_ids(loc).items():
-                found.setdefault(job_id, (link, loc))
-        except requests.RequestException as exc:
-            print(f"Bỏ qua tỉnh {loc}: {exc}", file=sys.stderr)
-    # Mã tin CareerViet tăng dần theo thời gian đăng: mã lớn là tin mới.
-    fresh = sorted((i for i in found if i not in on_site), key=lambda i: int(i, 16), reverse=True)
-    jobs, skipped = [], []
-    for job_id in fresh[:max_checks]:
-        if len(jobs) >= max_posts:
+    counts = {}
+    for j in posted:
+        counts[j.get("location")] = counts.get(j.get("location"), 0) + 1
+    found = {}  # nhãn khu vực -> {mã tin: (link, mã tỉnh)}, chỉ quét khi cần
+    checks, results, skipped = 0, [], []
+    for _ in range(max_posts):
+        posted_one = False
+        for label, locs, _w in region_order(counts):
+            if label not in found:
+                found[label] = {}
+                for loc in locs:
+                    try:
+                        for job_id, link in list_ids(loc).items():
+                            found[label].setdefault(job_id, (link, loc))
+                    except requests.RequestException as exc:
+                        print(f"Bỏ qua tỉnh {loc}: {exc}", file=sys.stderr)
+            # Mã tin CareerViet tăng dần theo thời gian đăng: mã lớn là tin mới.
+            fresh = sorted((i for i in found[label] if i not in on_site), key=lambda i: int(i, 16), reverse=True)
+            for job_id in fresh:
+                if checks >= max_checks:
+                    break
+                checks += 1
+                on_site.add(job_id)
+                link, loc = found[label][job_id]
+                try:
+                    job, reason = to_job(detail(job_id), link, loc)
+                except (requests.RequestException, ValueError) as exc:
+                    job, reason = None, f"lỗi đọc tin: {exc}"
+                if not job:
+                    skipped.append({"link": link, "ly_do": reason})
+                    continue
+                res = timviecso.post_jobs([job], dry_run=dry_run)[0]
+                results.append({**res, "khu_vuc": label})
+                if res["status"] in ("da_dang", "thu"):
+                    counts[label] = counts.get(label, 0) + 1
+                    posted_one = True
+                    break
+            if posted_one:
+                break
+        if not posted_one:
             break
-        link, loc = found[job_id]
-        try:
-            job, reason = to_job(detail(job_id), link, loc)
-        except (requests.RequestException, ValueError) as exc:
-            job, reason = None, f"lỗi đọc tin: {exc}"
-        if job:
-            jobs.append(job)
-        else:
-            skipped.append({"link": link, "ly_do": reason})
-    results = timviecso.post_jobs(jobs, dry_run=dry_run) if jobs else []
-    return {"tin_moi_chua_dang": len(fresh), "ket_qua": results, "bo_qua": skipped}
+    return {"tin_tren_trang": counts, "ket_qua": results, "bo_qua": skipped}
 
 
 def main(argv=None):
